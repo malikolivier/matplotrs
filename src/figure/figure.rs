@@ -9,7 +9,8 @@ pub struct FigureBuilder {
 struct FigureAttributes {
     figsize: (f64, f64),
     dpi: f64,
-    title: String,
+    title: Option<String>,
+    facecolor: [f64; 3],
 }
 
 impl FigureBuilder {
@@ -28,7 +29,12 @@ impl FigureBuilder {
     }
 
     fn with_title<T: Into<String>>(mut self, title: T) -> Self {
-        self.f.title = title.into();
+        self.f.title = Some(title.into());
+        self
+    }
+
+    fn with_facecolor<T: Into<f64>>(mut self, color: [T; 3]) -> Self {
+        self.f.facecolor = color.into();
         self
     }
 
@@ -48,7 +54,8 @@ impl Default for FigureAttributes {
         Self {
             figsize: (300.0, 400.0),
             dpi: 100.0,
-            title: "Figure".to_owned(),
+            title: None,
+            facecolor: [255.0, 255.0, 255.0],
         }
     }
 }
