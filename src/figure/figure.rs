@@ -1,3 +1,5 @@
+use color::Color;
+
 pub struct Figure {
     f: FigureAttributes,
 }
@@ -10,7 +12,7 @@ struct FigureAttributes {
     figsize: (f64, f64),
     dpi: f64,
     title: Option<String>,
-    facecolor: [f64; 3],
+    facecolor: Color,
 }
 
 impl FigureBuilder {
@@ -33,7 +35,7 @@ impl FigureBuilder {
         self
     }
 
-    fn with_facecolor<T: Into<f64>>(mut self, color: [T; 3]) -> Self {
+    fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
         self.f.facecolor = color.into();
         self
     }
@@ -55,7 +57,7 @@ impl Default for FigureAttributes {
             figsize: (300.0, 400.0),
             dpi: 100.0,
             title: None,
-            facecolor: [255.0, 255.0, 255.0],
+            facecolor: Color::rgb(255.0, 255.0, 255.0),
         }
     }
 }
