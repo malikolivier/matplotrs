@@ -8,6 +8,7 @@ pub struct FigureBuilder {
 
 struct FigureAttributes {
     figsize: (f64, f64),
+    dpi: f64,
     title: String,
 }
 
@@ -18,6 +19,11 @@ impl FigureBuilder {
 
     fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
         self.f.figsize = (width.into(), height.into());
+        self
+    }
+
+    fn with_dpi<T: Into<f64>>(mut self, dpi: T) -> Self {
+        self.f.dpi = dpi.into();
         self
     }
 
@@ -41,6 +47,7 @@ impl Default for FigureAttributes {
     fn default() -> Self {
         Self {
             figsize: (300.0, 400.0),
+            dpi: 100.0,
             title: "Figure".to_owned(),
         }
     }
