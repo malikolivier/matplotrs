@@ -14,10 +14,10 @@ pub struct FigureBuilder {
 }
 
 pub struct FigureAttributes {
-    figsize: (f64, f64),
-    dpi: f64,
-    title: Option<String>,
-    facecolor: Color,
+    pub figsize: (f64, f64),
+    pub dpi: f64,
+    pub title: Option<String>,
+    pub facecolor: Color,
 }
 
 impl FigureBuilder {
@@ -54,6 +54,10 @@ impl FigureBuilder {
 impl Figure {
     pub fn add_axes(&mut self) -> AxesBuilder {
         AxesBuilder { fig: self, a: Default::default() }
+    }
+
+    pub fn title(&self) -> Option<&str> {
+        self.f.title.as_ref().map(String::as_str)
     }
 }
 

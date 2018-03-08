@@ -1,5 +1,7 @@
+use backend::Backend;
+use backend::backend::Backend as BackendTrait;
+
 use figure::Figure;
-use render::RenderError;
 
 pub struct App {
     pub figs: Vec<Figure>
@@ -14,11 +16,14 @@ impl App {
         self.figs.push(fig);
     }
 
-    pub fn render(&mut self) -> Result<(), RenderError> {
-
+    pub fn render(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
+        let mut be = Backend::new();
         for fig in self.figs.iter() {
-
+            let title = fig.title().unwrap_or_else(|| "Figure 1");
+            let size = &fig.f.figsize;
+            be.new_figure(title, size);
+            // TODO axes!
         }
-        Ok(())
+        be.show()
     }
 }
