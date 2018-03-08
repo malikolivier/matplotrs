@@ -1,4 +1,5 @@
-extern crate matplotrs_backend;
+pub extern crate matplotrs_backend;
+pub use matplotrs_backend::Backend;
 extern crate printpdf;
 
 use std::fs::File;
@@ -10,6 +11,7 @@ pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>
 }
 
+#[derive(Debug)]
 pub enum PdfError {
     BackEndError(String),
     PrintPdfError(printpdf::PrintpdfError),

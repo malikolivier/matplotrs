@@ -9,13 +9,13 @@ pub mod app;
 #[cfg(feature = "amethyst")]
 pub mod backend {
     pub extern crate matplotrs_amethyst_backend as backend;
-    type Backend = backend::AmethystBackend;
+    pub type Backend = backend::AmethystBackend;
 }
 
 #[cfg(feature = "printpdf")]
 pub mod backend {
     pub extern crate matplotrs_printpdf_backend as backend;
-    type Backend = backend::PrintpdfBackend;
+    pub type Backend = backend::PrintPdfBackend;
 }
 
 #[cfg(not(any(feature = "amethyst", feature = "printpdf")))]
