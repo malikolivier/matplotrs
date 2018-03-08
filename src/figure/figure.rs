@@ -4,13 +4,13 @@ use artist::Artist;
 use app::App;
 
 pub struct Figure {
-    f: FigureAttributes,
-    children: Vec<Box<Artist>>,
+    pub f: FigureAttributes,
+    pub children: Vec<Box<Artist>>,
 }
 
-pub struct FigureBuilder<'a> {
-    pub f: FigureAttributes,
-    pub app: &'a mut App,
+pub struct FigureBuilder {
+    pub f: Figure,
+    // pub app: &'a mut App,
 }
 
 pub struct FigureAttributes {
@@ -20,31 +20,34 @@ pub struct FigureAttributes {
     facecolor: Color,
 }
 
-impl<'a> FigureBuilder<'a> {
+impl FigureBuilder {
+    pub fn new() -> Self {
+        let figure = Figure { f: Default::default(), children: Vec::new() };
+        FigureBuilder { f: figure/*, app: self*/ }
+    }
+
     pub fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
-        self.f.figsize = (width.into(), height.into());
+        self.f.f.figsize = (width.into(), height.into());
         self
     }
 
     pub fn with_dpi<T: Into<f64>>(mut self, dpi: T) -> Self {
-        self.f.dpi = dpi.into();
+        self.f.f.dpi = dpi.into();
         self
     }
 
     pub fn with_title<T: Into<String>>(mut self, title: T) -> Self {
-        self.f.title = Some(title.into());
+        self.f.f.title = Some(title.into());
         self
     }
 
     pub fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
-        self.f.facecolor = color.into();
+        self.f.f.facecolor = color.into();
         self
     }
 
-    pub fn build(self) -> &'a mut Figure {
-        let fig = Figure { f: self.f, children: Vec::new() };
-        self.app.figs.push(fig);
-        self.app.figs.last_mut().unwrap()
+    pub fn build(self) -> Figure {
+        self.f
     }
 }
 
