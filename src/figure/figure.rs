@@ -1,28 +1,26 @@
 use color::Color;
 use axes::AxesBuilder;
 use artist::Artist;
+use app::App;
 
 pub struct Figure {
     f: FigureAttributes,
     children: Vec<Box<Artist>>,
 }
 
-pub struct FigureBuilder {
-    f: FigureAttributes,
+pub struct FigureBuilder<'a> {
+    pub f: FigureAttributes,
+    pub app: &'a mut App,
 }
 
-struct FigureAttributes {
+pub struct FigureAttributes {
     figsize: (f64, f64),
     dpi: f64,
     title: Option<String>,
     facecolor: Color,
 }
 
-impl FigureBuilder {
-    pub fn new() -> Self {
-        FigureBuilder { f: Default::default() }
-    }
-
+impl<'a> FigureBuilder<'a> {
     pub fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
         self.f.figsize = (width.into(), height.into());
         self
@@ -43,16 +41,14 @@ impl FigureBuilder {
         self
     }
 
-    pub fn build(self) -> Figure {
-        Figure { f: self.f, children: Vec::new() }
+    pub fn build(self) -> &'a mut Figure {
+        let fig = Figure { f: self.f, children: Vec::new() };
+        self.app.figs.push(fig);
+        self.app.figs.last_mut().unwrap()
     }
 }
 
 impl Figure {
-    pub fn new() -> Self {
-        FigureBuilder::new().build()
-    }
-
     pub fn add_axes(&mut self) -> AxesBuilder {
         AxesBuilder { fig: self, a: Default::default() }
     }

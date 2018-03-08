@@ -4,6 +4,7 @@ pub mod figure;
 pub mod color;
 pub mod artist;
 
+pub mod app;
 pub mod render;
 
 #[cfg(feature = "amethyst")]
