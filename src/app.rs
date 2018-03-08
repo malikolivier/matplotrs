@@ -23,6 +23,7 @@ impl App {
             let size = &fig.f.figsize;
             be.new_figure(title, size);
             // TODO axes!
+            be.draw_path(&(1.0, 1.0, 1.0, 1.0), &[(1.0, 1.0), (5.0, 5.0)])?;
         }
         be.show()
     }
