@@ -4,3 +4,8 @@ version = "0.1.0"
 authors = ["Malik Olivier Boussejra <malik@boussejra.com>"]
 
 [dependencies]
+matplotrs_backend = { path = "./backend" }
+matplotrs_amethyst_backend = { path = "./amethyst_backend", optional = true }
+
+[features]
+amethyst = ["matplotrs_amethyst_backend"]
