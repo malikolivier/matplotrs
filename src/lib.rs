@@ -8,18 +8,20 @@ pub mod app;
 pub mod render;
 
 #[cfg(feature = "amethyst")]
-extern crate matplotrs_amethyst_backend as amethyst_backend;
-#[cfg(feature = "amethyst")]
-pub type Backend = amethyst_backend::AmethystBackend;
+pub mod backend {
+    extern crate matplotrs_amethyst_backend as backend;
+    type Backend = backend::AmethystBackend;
+}
 
 #[cfg(feature = "printpdf")]
-extern crate matplotrs_printpdf_backend as printpdf_backend;
-#[cfg(feature = "printpdf")]
-pub type Backend = printpdf_backend::PrintpdfBackend;
+pub mod backend {
+    extern crate matplotrs_printpdf_backend as backend;
+    type Backend = backend::PrintpdfBackend;
+}
 
 #[cfg(not(all(feature = "amethyst", feature = "printpdf")))]
-extern crate matplotrs_backend;
-#[cfg(not(all(feature = "amethyst", feature = "printpdf")))]
-pub mod dummy_backend;
-#[cfg(not(all(feature = "amethyst", feature = "printpdf")))]
-pub type Backend = dummy_backend::DummyBackend;
+pub mod backend {
+    extern crate matplotrs_backend as backend;
+    pub mod dummy;
+    type Backend = dummy::DummyBackend;
+}

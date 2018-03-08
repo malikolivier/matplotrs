@@ -1,10 +1,10 @@
-use matplotrs_backend;
+use backend::backend;
 
 pub struct DummyBackend {
     fig: ()
 }
 
-impl matplotrs_backend::Backend for DummyBackend {
+impl backend::Backend for DummyBackend {
     type Err = !;
     type Figure = ();
 

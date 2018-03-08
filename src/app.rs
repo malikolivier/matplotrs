@@ -1,4 +1,4 @@
-use figure::{Figure, FigureBuilder};
+use figure::Figure;
 use render::RenderError;
 
 pub struct App {
@@ -15,6 +15,10 @@ impl App {
     }
 
     pub fn render(&mut self) -> Result<(), RenderError> {
-        unimplemented!()
+
+        for fig in self.figs.iter() {
+
+        }
+        Ok(())
     }
 }
