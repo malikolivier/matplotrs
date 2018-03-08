@@ -1,7 +1,10 @@
 use color::Color;
+use axes::AxesBuilder;
+use artist::Artist;
 
 pub struct Figure {
     f: FigureAttributes,
+    children: Vec<Box<Artist>>,
 }
 
 pub struct FigureBuilder {
@@ -41,13 +44,17 @@ impl FigureBuilder {
     }
 
     fn build(self) -> Figure {
-        Figure { f: self.f }
+        Figure { f: self.f, children: Vec::new() }
     }
 }
 
 impl Figure {
     fn new() -> Self {
         FigureBuilder::new().build()
+    }
+
+    fn add_axes(&mut self) -> AxesBuilder {
+        AxesBuilder { fig: self, a: Default::default() }
     }
 }
 
