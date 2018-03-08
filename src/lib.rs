@@ -18,7 +18,7 @@ pub mod backend {
     type Backend = backend::PrintpdfBackend;
 }
 
-#[cfg(not(all(feature = "amethyst", feature = "printpdf")))]
+#[cfg(not(any(feature = "amethyst", feature = "printpdf")))]
 pub mod backend {
     pub extern crate matplotrs_backend as backend;
     mod dummy;
