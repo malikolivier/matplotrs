@@ -5,7 +5,6 @@ use std::fs::File;
 use std::io::BufWriter;
 
 use printpdf::{PdfDocument, PdfDocumentReference, Mm};
-// use printpdf::indices::{PdfPageIndex, PdfLayerIndex};
 
 pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>

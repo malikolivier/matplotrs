@@ -1,3 +1,3 @@
 mod figure;
 
-pub use self::figure::Figure;
+pub use self::figure::{Figure, FigureBuilder};

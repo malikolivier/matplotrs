@@ -25,16 +25,16 @@ impl<'f> Artist for Axes<'f> {
 }
 
 impl<'f> AxesBuilder<'f> {
-    fn build(self) -> Axes<'f> {
+    pub fn build(self) -> Axes<'f> {
         Axes { a: self.a, children: Vec::new(), fig: self.fig }
     }
 
-    fn with_rect(mut self, rect: &[f64; 4]) -> Self {
+    pub fn with_rect(mut self, rect: &[f64; 4]) -> Self {
         self.a.rect = rect.clone();
         self
     }
 
-    fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
+    pub fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
         self.a.facecolor = color.into();
         self
     }

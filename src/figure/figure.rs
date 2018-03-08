@@ -19,41 +19,41 @@ struct FigureAttributes {
 }
 
 impl FigureBuilder {
-    fn new() -> Self {
+    pub fn new() -> Self {
         FigureBuilder { f: Default::default() }
     }
 
-    fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
+    pub fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
         self.f.figsize = (width.into(), height.into());
         self
     }
 
-    fn with_dpi<T: Into<f64>>(mut self, dpi: T) -> Self {
+    pub fn with_dpi<T: Into<f64>>(mut self, dpi: T) -> Self {
         self.f.dpi = dpi.into();
         self
     }
 
-    fn with_title<T: Into<String>>(mut self, title: T) -> Self {
+    pub fn with_title<T: Into<String>>(mut self, title: T) -> Self {
         self.f.title = Some(title.into());
         self
     }
 
-    fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
+    pub fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
         self.f.facecolor = color.into();
         self
     }
 
-    fn build(self) -> Figure {
+    pub fn build(self) -> Figure {
         Figure { f: self.f, children: Vec::new() }
     }
 }
 
 impl Figure {
-    fn new() -> Self {
+    pub fn new() -> Self {
         FigureBuilder::new().build()
     }
 
-    fn add_axes(&mut self) -> AxesBuilder {
+    pub fn add_axes(&mut self) -> AxesBuilder {
         AxesBuilder { fig: self, a: Default::default() }
     }
 }
