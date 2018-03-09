@@ -7,6 +7,7 @@ pub mod artist;
 
 pub mod app;
 pub mod line;
+pub mod line_collection;
 
 pub extern crate matplotrs_backend;
 
