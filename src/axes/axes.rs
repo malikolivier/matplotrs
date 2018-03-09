@@ -16,19 +16,20 @@ pub struct AxesAttributes {
     rect: [f64; 4],
     facecolor: Option<Color>,
     edgecolor: Option<Color>,
-
 }
 
 impl Artist for Axes {
-    fn path(&self) -> matplotrs_backend::Path {
+    fn paths(&self) -> Vec<matplotrs_backend::Path> {
         let [x, y, dx, dy] = self.a.rect;
         let points = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
-        matplotrs_backend::Path {
-            points,
-            closed: true,
-            line_color: self.a.edgecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
-            fill_color: self.a.facecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
-        }
+        vec![
+            matplotrs_backend::Path {
+                points,
+                closed: true,
+                line_color: self.a.edgecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
+                fill_color: self.a.facecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
+            },
+        ]
     }
 }
 

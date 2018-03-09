@@ -24,8 +24,10 @@ impl App {
             be.new_figure(title, size);
             // TODO axes!
             for artist in fig.children.iter() {
-                let path = (**artist).path();
-                be.draw_path(&path)?;
+                let paths = (**artist).paths();
+                for path in paths {
+                    be.draw_path(&path)?;
+                }
             }
         }
         be.show()
