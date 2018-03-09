@@ -4,10 +4,15 @@ use std::cmp::Ordering;
 use artist::Artist;
 
 pub struct Plot {
-    data: Vec<Vec<(f64, f64)>>,
+    data: Vec<PlotSeries>,
     xlims: (f64, f64),
     ylims: (f64, f64),
     p: PlotAttributes,
+}
+
+pub struct PlotSeries {
+    data: Vec<(f64, f64)>,
+    edgecolor: Color,
 }
 
 pub struct PlotBuilder {
@@ -18,7 +23,6 @@ pub struct PlotBuilder {
 }
 
 pub struct PlotAttributes {
-    edgecolor: Color,
 }
 
 trait MinMaxWith<T>: IntoIterator<Item = T> {
@@ -120,8 +124,11 @@ impl PlotBuilder {
             Some(ylims) => ylims,
             None => y_min_max(&self.data),
         };
+        let all_series = self.data.into_iter().map(|one_series|
+            PlotSeries { data: one_series, edgecolor: BLACK }
+        ).collect();
         Plot {
-            data: self.data,
+            data: all_series,
             xlims: prevent_null_interval(xlims),
             ylims: prevent_null_interval(ylims),
             p: self.p,
@@ -146,27 +153,22 @@ impl PlotBuilder {
         self.ylims = Some(ylims);
         self
     }
-
-    pub fn with_edgecolor<T: Into<Color>>(mut self, color: T) -> Self {
-        self.p.edgecolor = color.into();
-        self
-    }
 }
 
 impl Default for PlotAttributes {
     fn default() -> Self {
-        Self { edgecolor: BLACK }
+        Self {}
     }
 }
 
 impl Artist for Plot {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
-        let Color(r, g, b, a) = self.p.edgecolor;
         self.data
             .iter()
             .map(|series| {
+                let Color(r, g, b, a) = series.edgecolor;
                 let path = matplotrs_backend::Path {
-                    points: series.clone(),
+                    points: series.data.clone(),
                     closed: false,
                     line_color: Some((r, g, b, a)),
                     fill_color: None,
