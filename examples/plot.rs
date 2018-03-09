@@ -14,9 +14,14 @@ fn main() {
     let mut fig = Figure::new();
     let mut axes = AxesBuilder::new().with_edgecolor(RED).build();
     axes.add_child(Line::new((0.0, 0.0), (0.5, 0.5)));
-    let linecol = LineCollectionBuilder::new().with_vertices(
-        vec![(-1.0, -0.7), (-0.7, -0.6), (-0.4, -0.75), (-0.1, -0.8)]
-    ).build();
+    let linecol = LineCollectionBuilder::new()
+        .with_vertices(vec![
+            (-1.0, -0.7),
+            (-0.7, -0.6),
+            (-0.4, -0.75),
+            (-0.1, -0.8),
+        ])
+        .build();
     axes.add_child(linecol);
     let plot = PlotBuilder::new(vec![(0.0, 1.0), (1.0, 1.5), (2.0, 1.7)]).build();
     axes.add_child(plot);

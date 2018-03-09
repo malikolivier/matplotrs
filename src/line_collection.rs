@@ -18,9 +18,7 @@ pub struct LineCollectionAttributes {
 
 impl LineCollection {
     pub fn new() -> Self {
-        Self {
-            l: Default::default(),
-        }
+        Self { l: Default::default() }
     }
 
     pub fn add_vertex(&mut self, vertex: (f64, f64)) {
@@ -28,7 +26,8 @@ impl LineCollection {
     }
 
     pub fn add_vertices<I>(&mut self, vertex: I)
-        where I: IntoIterator<Item = (f64, f64)>
+    where
+        I: IntoIterator<Item = (f64, f64)>,
     {
         self.l.lines.extend(vertex);
     }
@@ -36,9 +35,7 @@ impl LineCollection {
 
 impl LineCollectionBuilder {
     pub fn new() -> Self {
-        Self {
-            l: Default::default(),
-        }
+        Self { l: Default::default() }
     }
 
     pub fn with_edgecolor<T: Into<Color>>(mut self, color: T) -> Self {
@@ -47,16 +44,15 @@ impl LineCollectionBuilder {
     }
 
     pub fn with_vertices<I>(mut self, vertex: I) -> Self
-        where I: IntoIterator<Item = (f64, f64)>
+    where
+        I: IntoIterator<Item = (f64, f64)>,
     {
         self.l.lines.extend(vertex);
         self
     }
 
     pub fn build(self) -> LineCollection {
-        LineCollection {
-            l: self.l,
-        }
+        LineCollection { l: self.l }
     }
 }
 

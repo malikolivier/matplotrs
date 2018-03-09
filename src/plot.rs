@@ -23,9 +23,11 @@ pub struct PlotAttributes {
 
 trait MinMaxWith<T>: IntoIterator<Item = T> {
     fn min_with<F>(&self, f: F) -> Option<&T>
-        where F: Fn(&T, &T) -> Ordering;
+    where
+        F: Fn(&T, &T) -> Ordering;
     fn max_with<F>(&self, f: F) -> Option<&T>
-        where F: Fn(&T, &T) -> Ordering
+    where
+        F: Fn(&T, &T) -> Ordering,
     {
         self.min_with(|x1, x2| f(x1, x2).reverse())
     }
@@ -33,7 +35,8 @@ trait MinMaxWith<T>: IntoIterator<Item = T> {
 
 impl<T> MinMaxWith<T> for Vec<T> {
     fn min_with<F>(&self, f: F) -> Option<&T>
-        where F: Fn(&T, &T) -> Ordering
+    where
+        F: Fn(&T, &T) -> Ordering,
     {
         if self.is_empty() {
             None
@@ -62,10 +65,12 @@ fn x_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
     let mut min = 0.0;
     let mut max = 0.0;
     for single_series in series {
-        single_series.min_with(tuple_partial_cmp_x).map(|&(x_min, _y_min)| {
+        single_series.min_with(tuple_partial_cmp_x).map(|&(x_min,
+           _y_min)| {
             min = x_min;
         });
-        single_series.max_with(tuple_partial_cmp_x).map(|&(x_max, _y_max)| {
+        single_series.max_with(tuple_partial_cmp_x).map(|&(x_max,
+           _y_max)| {
             max = x_max;
         });
     }
@@ -76,10 +81,12 @@ fn y_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
     let mut min = 0.0;
     let mut max = 0.0;
     for single_series in series {
-        single_series.min_with(tuple_partial_cmp_y).map(|&(_x_min, y_min)| {
+        single_series.min_with(tuple_partial_cmp_y).map(|&(_x_min,
+           y_min)| {
             min = y_min;
         });
-        single_series.max_with(tuple_partial_cmp_y).map(|&(_x_max, y_max)| {
+        single_series.max_with(tuple_partial_cmp_y).map(|&(_x_max,
+           y_max)| {
             max = y_max;
         });
     }
@@ -96,17 +103,22 @@ fn prevent_null_interval((min, max): (f64, f64)) -> (f64, f64) {
 
 impl PlotBuilder {
     pub fn new(one_series: Vec<(f64, f64)>) -> Self {
-        Self { data: vec![one_series], xlims: None, ylims: None, p: Default::default() }
+        Self {
+            data: vec![one_series],
+            xlims: None,
+            ylims: None,
+            p: Default::default(),
+        }
     }
 
     pub fn build(self) -> Plot {
         let xlims = match self.xlims {
             Some(xlims) => xlims,
-            None        => x_min_max(&self.data),
+            None => x_min_max(&self.data),
         };
         let ylims = match self.ylims {
             Some(ylims) => ylims,
-            None        => y_min_max(&self.data),
+            None => y_min_max(&self.data),
         };
         Plot {
             data: self.data,
@@ -117,7 +129,12 @@ impl PlotBuilder {
     }
 
     pub fn new_multi_series(multi_series: Vec<Vec<(f64, f64)>>) -> Self {
-        Self { data: multi_series, xlims: None, ylims: None, p: Default::default() }
+        Self {
+            data: multi_series,
+            xlims: None,
+            ylims: None,
+            p: Default::default(),
+        }
     }
 
     pub fn with_xlims(mut self, xlims: (f64, f64)) -> Self {
@@ -138,24 +155,25 @@ impl PlotBuilder {
 
 impl Default for PlotAttributes {
     fn default() -> Self {
-        Self {
-            edgecolor: BLACK,
-        }
+        Self { edgecolor: BLACK }
     }
 }
 
 impl Artist for Plot {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
         let Color(r, g, b, a) = self.p.edgecolor;
-        self.data.iter().map(|series| {
-            let path = matplotrs_backend::Path {
-                points: series.clone(),
-                closed: false,
-                line_color: Some((r, g, b, a)),
-                fill_color: None,
-            };
-            self.transform_path(path)
-        }).collect()
+        self.data
+            .iter()
+            .map(|series| {
+                let path = matplotrs_backend::Path {
+                    points: series.clone(),
+                    closed: false,
+                    line_color: Some((r, g, b, a)),
+                    fill_color: None,
+                };
+                self.transform_path(path)
+            })
+            .collect()
     }
 }
 
@@ -166,8 +184,10 @@ impl Plot {
         let (ymin, ymax) = self.ylims;
         for point in path.points.iter_mut() {
             let (px, py) = *point;
-            *point = (  (px - xmin) * 2.0 / (xmax - xmin) - 1.0,
-                      - (py - ymin) * 2.0 / (ymax - ymin) + 1.0);
+            *point = (
+                (px - xmin) * 2.0 / (xmax - xmin) - 1.0,
+                -(py - ymin) * 2.0 / (ymax - ymin) + 1.0,
+            );
         }
         path
     }
