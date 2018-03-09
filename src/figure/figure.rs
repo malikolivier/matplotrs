@@ -52,6 +52,10 @@ impl FigureBuilder {
 }
 
 impl Figure {
+    pub fn new() -> Self {
+        FigureBuilder::new().build()
+    }
+
     pub fn add_child<C: Artist + 'static>(&mut self, child: C) {
         self.children.push(Box::new(child));
     }

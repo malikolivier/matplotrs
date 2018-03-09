@@ -83,3 +83,9 @@ impl Default for AxesAttributes {
         }
     }
 }
+
+impl Axes {
+    pub fn add_child<C: Artist + 'static>(&mut self, child: C) {
+        self.children.push(Box::new(child));
+    }
+}
