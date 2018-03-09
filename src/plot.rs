@@ -166,8 +166,8 @@ impl Plot {
         let (ymin, ymax) = self.ylims;
         for point in path.points.iter_mut() {
             let (px, py) = *point;
-            *point = ((px - xmin) * 2.0 / (xmax - xmin) - 1.0,
-                      (py - ymin) * 2.0 / (ymax - ymin) - 1.0);
+            *point = (  (px - xmin) * 2.0 / (xmax - xmin) - 1.0,
+                      - (py - ymin) * 2.0 / (ymax - ymin) + 1.0);
         }
         path
     }
