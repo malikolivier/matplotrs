@@ -140,12 +140,27 @@ impl Artist for Plot {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
         let Color(r, g, b, a) = self.p.edgecolor;
         self.data.iter().map(|series| {
-            matplotrs_backend::Path {
+            let path = matplotrs_backend::Path {
                 points: series.clone(),
                 closed: false,
                 line_color: Some((r, g, b, a)),
                 fill_color: None,
-            }
+            };
+            self.transform_path(path)
         }).collect()
+    }
+}
+
+impl Plot {
+    /// Transform plot path to make xlims and ylims fit into [-1, 1]
+    fn transform_path(&self, mut path: matplotrs_backend::Path) -> matplotrs_backend::Path {
+        let (xmin, xmax) = self.xlims;
+        let (ymin, ymax) = self.ylims;
+        for point in path.points.iter_mut() {
+            let (px, py) = *point;
+            *point = ((px - xmin) * 2.0 / (xmax - xmin) - 1.0,
+                      (py - ymin) * 2.0 / (ymax - ymin) - 1.0);
+        }
+        path
     }
 }
