@@ -8,7 +8,6 @@ pub struct Figure {
 
 pub struct FigureBuilder {
     pub f: Figure,
-    // pub app: &'a mut App,
 }
 
 pub struct FigureAttributes {
@@ -21,7 +20,7 @@ pub struct FigureAttributes {
 impl FigureBuilder {
     pub fn new() -> Self {
         let figure = Figure { f: Default::default(), children: Vec::new() };
-        FigureBuilder { f: figure/*, app: self*/ }
+        FigureBuilder { f: figure }
     }
 
     pub fn with_figsize<W: Into<f64>, H: Into<f64>>(mut self, width: W, height: H) -> Self {
