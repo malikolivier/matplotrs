@@ -6,6 +6,7 @@ pub mod color;
 pub mod artist;
 
 pub mod app;
+pub mod line;
 
 pub extern crate matplotrs_backend;
 

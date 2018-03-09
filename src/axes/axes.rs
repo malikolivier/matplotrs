@@ -38,6 +38,7 @@ impl Artist for Axes {
         for artist in self.children.iter() {
             let paths = artist.paths();
             for path in paths {
+                // Need to transform path's position for it to be used here!
                 be.draw_path(&path)?;
             }
             artist.render_children(be)?;
