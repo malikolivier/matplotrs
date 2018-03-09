@@ -66,6 +66,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             let fill_color = printpdf::Color::Rgb(printpdf::Rgb::new(color.0, color.1, color.2, None));
             layer.set_fill_color(fill_color);
         }
+        if let Some(color) = path.line_color {
+            let line_color = printpdf::Color::Rgb(printpdf::Rgb::new(color.0, color.1, color.2, None));
+            layer.set_outline_color(line_color);
+        }
         layer.add_shape(line);
         Ok(())
     }

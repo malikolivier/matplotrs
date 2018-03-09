@@ -1,6 +1,6 @@
 use matplotrs_backend;
 
-use color::{Color, WHITE};
+use color::Color;
 use artist::Artist;
 
 pub struct Axes {
@@ -14,19 +14,20 @@ pub struct AxesBuilder {
 
 pub struct AxesAttributes {
     rect: [f64; 4],
-    facecolor: Color,
+    facecolor: Option<Color>,
+    edgecolor: Option<Color>,
+
 }
 
 impl Artist for Axes {
     fn path(&self) -> matplotrs_backend::Path {
         let [x, y, dx, dy] = self.a.rect;
-        let Color(r, g, b, a) = self.a.facecolor;
         let points = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
         matplotrs_backend::Path {
             points,
             closed: true,
-            line_color: Some((1.0, 1.0, 1.0, 1.0)),
-            fill_color: Some((r, g, b, a)),
+            line_color: self.a.edgecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
+            fill_color: self.a.facecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
         }
     }
 }
@@ -49,7 +50,12 @@ impl AxesBuilder {
     }
 
     pub fn with_facecolor<T: Into<Color>>(mut self, color: T) -> Self {
-        self.a.facecolor = color.into();
+        self.a.facecolor = Some(color.into());
+        self
+    }
+
+    pub fn with_edgecolor<T: Into<Color>>(mut self, color: T) -> Self {
+        self.a.edgecolor = Some(color.into());
         self
     }
 }
@@ -57,8 +63,9 @@ impl AxesBuilder {
 impl Default for AxesAttributes {
     fn default() -> Self {
         AxesAttributes {
-            rect: [0.2, 0.2, 0.6, 0.6],
-            facecolor: WHITE,
+            rect: [-0.6, -0.6, 1.2, 1.2],
+            facecolor: None,
+            edgecolor: None,
         }
     }
 }
