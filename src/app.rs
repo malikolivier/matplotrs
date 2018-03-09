@@ -4,7 +4,7 @@ use matplotrs_backend::Backend as BackendTrait;
 use figure::Figure;
 
 pub struct App {
-    pub figs: Vec<Figure>
+    pub figs: Vec<Figure>,
 }
 
 impl App {

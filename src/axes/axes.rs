@@ -22,7 +22,12 @@ impl Artist for Axes {
         let [x, y, dx, dy] = self.a.rect;
         let Color(r, g, b, a) = self.a.facecolor;
         let points = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
-        matplotrs_backend::Path { points, closed: true, line_color: None, fill_color: Some((r, g, b, a)) }
+        matplotrs_backend::Path {
+            points,
+            closed: true,
+            line_color: Some((1.0, 1.0, 1.0, 1.0)),
+            fill_color: Some((r, g, b, a)),
+        }
     }
 }
 
@@ -32,7 +37,10 @@ impl AxesBuilder {
     }
 
     pub fn build(self) -> Axes {
-        Axes { a: self.a, children: Vec::new() }
+        Axes {
+            a: self.a,
+            children: Vec::new(),
+        }
     }
 
     pub fn with_rect(mut self, rect: &[f64; 4]) -> Self {

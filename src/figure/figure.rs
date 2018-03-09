@@ -19,7 +19,10 @@ pub struct FigureAttributes {
 
 impl FigureBuilder {
     pub fn new() -> Self {
-        let figure = Figure { f: Default::default(), children: Vec::new() };
+        let figure = Figure {
+            f: Default::default(),
+            children: Vec::new(),
+        };
         FigureBuilder { f: figure }
     }
 
