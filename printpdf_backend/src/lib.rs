@@ -10,6 +10,7 @@ use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm};
 pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>,
     layer: Option<PdfLayerReference>,
+    size: Option<(Mm, Mm)>,
 }
 
 #[derive(Debug)]
@@ -26,6 +27,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         PrintPdfBackend {
             doc: None,
             layer: None,
+            size: None,
         }
     }
 
@@ -42,11 +44,14 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                 self.layer = Some(doc.get_page(new_page).get_layer(new_layer1));
             }
         }
-
+        self.size = Some((Mm(size.0), Mm(size.1)));
     }
 
     fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)]) -> Result<(), Self::Err> {
-        let points = path.iter().map(|&(x, y)| (printpdf::Point::new(Mm(x), Mm(y)), false) ).collect();
+        let points = path.iter().map(|coords| {
+            let (x_pdf, y_pdf) = self.transform(coords);
+            (printpdf::Point::new(x_pdf, y_pdf), false)
+        }).collect();
         let line = printpdf::Line {
             points,
             is_closed: true,
@@ -72,6 +77,13 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             }
         }
 
+    }
+}
+
+impl PrintPdfBackend {
+    fn transform(&self, &(x, y): &(f64, f64)) -> (Mm, Mm) {
+        let (Mm(rightmost), Mm(upmost)) = self.size.expect("Some size");
+        (Mm(rightmost * (1.0 + x) / 2.0), Mm(upmost * (1.0 - y) / 2.0))
     }
 }
 
