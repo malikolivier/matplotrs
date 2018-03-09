@@ -47,15 +47,15 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         self.size = Some((Mm(size.0), Mm(size.1)));
     }
 
-    fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)]) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)], closed: bool) -> Result<(), Self::Err> {
         let points = path.iter().map(|coords| {
             let (x_pdf, y_pdf) = self.transform(coords);
             (printpdf::Point::new(x_pdf, y_pdf), false)
         }).collect();
         let line = printpdf::Line {
             points,
-            is_closed: true,
-            has_fill: true,
+            is_closed: closed,
+            has_fill: false,
             has_stroke: true,
             is_clipping_path: false,
         };

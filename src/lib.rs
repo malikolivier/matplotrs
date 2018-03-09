@@ -1,4 +1,5 @@
 #![feature(never_type)]
+#![feature(slice_patterns)]
 pub mod axes;
 pub mod figure;
 pub mod color;

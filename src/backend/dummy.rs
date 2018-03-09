@@ -12,8 +12,7 @@ impl backend::Backend for DummyBackend {
         DummyBackend { fig: () }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> &mut Self::Figure {
-        &mut self.fig
+    fn new_figure(&mut self, title: &str, size: &(f64, f64)) {
     }
 
     fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)]) -> Result<(), Self::Err> {

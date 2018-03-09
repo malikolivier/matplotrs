@@ -1,7 +1,5 @@
 use color::Color;
-use axes::AxesBuilder;
 use artist::Artist;
-use app::App;
 
 pub struct Figure {
     pub f: FigureAttributes,
@@ -52,8 +50,8 @@ impl FigureBuilder {
 }
 
 impl Figure {
-    pub fn add_axes(&mut self) -> AxesBuilder {
-        AxesBuilder { fig: self, a: Default::default() }
+    pub fn add_child<C: Artist + 'static>(&mut self, child: C) {
+        self.children.push(Box::new(child));
     }
 
     pub fn title(&self) -> Option<&str> {

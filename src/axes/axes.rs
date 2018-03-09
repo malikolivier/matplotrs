@@ -1,19 +1,16 @@
 //use std::rc::Weak;
 
 use color::{Color, WHITE};
-use figure::Figure;
 use artist::Artist;
 
-pub struct Axes<'f> {
+pub struct Axes {
     a: AxesAttributes,
     children: Vec<Box<Artist>>,
-    /// Include parent figure for reference (if needed)
-    fig: &'f Figure,
 }
 
-pub struct AxesBuilder<'f> {
+pub struct AxesBuilder {
     pub a: AxesAttributes,
-    pub fig: &'f Figure,
+    //pub fig: &'f Figure,
 }
 
 pub struct AxesAttributes {
@@ -21,12 +18,21 @@ pub struct AxesAttributes {
     facecolor: Color,
 }
 
-impl<'f> Artist for Axes<'f> {
+impl Artist for Axes {
+    fn path(&self) -> (Vec<(f64, f64)>, bool) {
+        let [x, y, dx, dy] = self.a.rect;
+        let path = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
+        (path, true)
+    }
 }
 
-impl<'f> AxesBuilder<'f> {
-    pub fn build(self) -> Axes<'f> {
-        Axes { a: self.a, children: Vec::new(), fig: self.fig }
+impl AxesBuilder {
+    pub fn new() -> AxesBuilder {
+        AxesBuilder { a: Default::default() }
+    }
+
+    pub fn build(self) -> Axes {
+        Axes { a: self.a, children: Vec::new() }
     }
 
     pub fn with_rect(mut self, rect: &[f64; 4]) -> Self {

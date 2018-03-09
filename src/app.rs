@@ -23,7 +23,10 @@ impl App {
             let size = &fig.f.figsize;
             be.new_figure(title, size);
             // TODO axes!
-            be.draw_path(&(1.0, 1.0, 1.0, 1.0), &[(-0.5, -0.5), (0.5, -0.5)])?;
+            for artist in fig.children.iter() {
+                let (path, closed) = (**artist).path();
+                be.draw_path(&(1.0, 1.0, 1.0, 1.0), &path, closed)?;
+            }
         }
         be.show()
     }
