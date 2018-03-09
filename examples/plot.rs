@@ -6,6 +6,7 @@ use matplotrs::axes::AxesBuilder;
 use matplotrs::color::RED;
 use matplotrs::line::Line;
 use matplotrs::line_collection::LineCollectionBuilder;
+use matplotrs::plot::PlotBuilder;
 
 
 fn main() {
@@ -17,6 +18,8 @@ fn main() {
         vec![(-1.0, -0.7), (-0.7, -0.6), (-0.4, -0.75), (-0.1, -0.8)]
     ).build();
     axes.add_child(linecol);
+    let plot = PlotBuilder::new(vec![(0.0, 1.0), (1.0, 1.5), (2.0, 1.7)]).build();
+    axes.add_child(plot);
     fig.add_child(axes);
     app.add_figure(fig);
     app.render().unwrap();
