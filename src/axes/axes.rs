@@ -39,6 +39,7 @@ impl Artist for Axes {
             let paths = artist.paths();
             for path in paths {
                 // Need to transform path's position for it to be used here!
+                let path = self.transform_path(path);
                 be.draw_path(&path)?;
             }
             artist.render_children(be)?;
@@ -88,5 +89,15 @@ impl Default for AxesAttributes {
 impl Axes {
     pub fn add_child<C: Artist + 'static>(&mut self, child: C) {
         self.children.push(Box::new(child));
+    }
+
+    /// Transform child's path to parent's coordinate system
+    fn transform_path(&self, mut path: matplotrs_backend::Path) -> matplotrs_backend::Path {
+        let [x, y, dx, dy] = self.a.rect;
+        for point in path.points.iter_mut() {
+            let (px, py) = *point;
+            *point = (x + dx / 2.0 + px * (x + dx - (x + dx) / 2.0), y + dy / 2.0 + py * (y + dy - (y + dy) / 2.0));
+        }
+        path
     }
 }
