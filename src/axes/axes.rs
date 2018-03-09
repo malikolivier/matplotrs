@@ -96,7 +96,7 @@ impl Axes {
         let [x, y, dx, dy] = self.a.rect;
         for point in path.points.iter_mut() {
             let (px, py) = *point;
-            *point = (x + dx / 2.0 + px * (x + dx - (x + dx) / 2.0), y + dy / 2.0 + py * (y + dy - (y + dy) / 2.0));
+            *point = (x + dx / 2.0 * (1.0 + px), y + dy / 2.0 * (1.0 + py));
         }
         path
     }
