@@ -1,3 +1,5 @@
+use matplotrs_backend;
+
 pub trait Artist {
-    fn path(&self) -> (Vec<(f64, f64)>, bool);
+    fn path(&self) -> matplotrs_backend::Path;
 }

@@ -1,5 +1,5 @@
 use backend::Backend;
-use backend::backend::Backend as BackendTrait;
+use matplotrs_backend::Backend as BackendTrait;
 
 use figure::Figure;
 
@@ -24,8 +24,8 @@ impl App {
             be.new_figure(title, size);
             // TODO axes!
             for artist in fig.children.iter() {
-                let (path, closed) = (**artist).path();
-                be.draw_path(&(1.0, 1.0, 1.0, 1.0), &path, closed)?;
+                let path = (**artist).path();
+                be.draw_path(&path)?;
             }
         }
         be.show()

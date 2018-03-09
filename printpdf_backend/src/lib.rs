@@ -47,23 +47,26 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         self.size = Some((Mm(size.0), Mm(size.1)));
     }
 
-    fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)], closed: bool) -> Result<(), Self::Err> {
-        let points = path.iter().map(|coords| {
+    fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+        let points = path.points.iter().map(|coords| {
             let (x_pdf, y_pdf) = self.transform(coords);
             (printpdf::Point::new(x_pdf, y_pdf), false)
         }).collect();
         let line = printpdf::Line {
             points,
-            is_closed: closed,
-            has_fill: false,
-            has_stroke: true,
+            is_closed: path.closed,
+            has_fill: path.fill_color.is_some(),
+            has_stroke: path.line_color.is_some(),
             is_clipping_path: false,
         };
-        // let fill_color = printpdf::Color::Rgb(printpdf::Rgb::new(color.0, color.1, color.2, None));
-        // let outline_color = printpdf::Color::Rgb(printpdf::Rgb::new(0.0, 0.0, 0.0, None));
-        self.layer.as_ref().ok_or_else(|| {
+        let layer = self.layer.as_ref().ok_or_else(|| {
             PdfError::BackEndError("No figure created!".to_owned())
-        })?.add_shape(line);
+        })?;
+        if let Some(color) = path.fill_color {
+            let fill_color = printpdf::Color::Rgb(printpdf::Rgb::new(color.0, color.1, color.2, None));
+            layer.set_fill_color(fill_color);
+        }
+        layer.add_shape(line);
         Ok(())
     }
 

@@ -7,6 +7,8 @@ pub mod artist;
 
 pub mod app;
 
+pub extern crate matplotrs_backend;
+
 #[cfg(feature = "amethyst")]
 pub mod backend {
     pub extern crate matplotrs_amethyst_backend as backend;
@@ -21,7 +23,6 @@ pub mod backend {
 
 #[cfg(not(any(feature = "amethyst", feature = "printpdf")))]
 pub mod backend {
-    pub extern crate matplotrs_backend as backend;
     mod dummy;
     pub type Backend = dummy::DummyBackend;
 }

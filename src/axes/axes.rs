@@ -1,4 +1,4 @@
-//use std::rc::Weak;
+use matplotrs_backend;
 
 use color::{Color, WHITE};
 use artist::Artist;
@@ -10,7 +10,6 @@ pub struct Axes {
 
 pub struct AxesBuilder {
     pub a: AxesAttributes,
-    //pub fig: &'f Figure,
 }
 
 pub struct AxesAttributes {
@@ -19,10 +18,11 @@ pub struct AxesAttributes {
 }
 
 impl Artist for Axes {
-    fn path(&self) -> (Vec<(f64, f64)>, bool) {
+    fn path(&self) -> matplotrs_backend::Path {
         let [x, y, dx, dy] = self.a.rect;
-        let path = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
-        (path, true)
+        let Color(r, g, b, a) = self.a.facecolor;
+        let points = vec![(x, y), (x + dx, y), (x + dx, y + dy), (x, y + dy)];
+        matplotrs_backend::Path { points, closed: true, line_color: None, fill_color: Some((r, g, b, a)) }
     }
 }
 

@@ -13,7 +13,7 @@
 
 /// RGBA Color
 #[derive(PartialEq, Copy, Clone, Debug)]
-pub struct Color(f64, f64, f64, f64);
+pub struct Color(pub f64, pub f64, pub f64, pub f64);
 
 
 impl Color {

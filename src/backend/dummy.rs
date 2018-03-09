@@ -1,10 +1,10 @@
-use backend::backend;
+use matplotrs_backend;
 
 pub struct DummyBackend {
     fig: ()
 }
 
-impl backend::Backend for DummyBackend {
+impl matplotrs_backend::Backend for DummyBackend {
     type Err = !;
     type Figure = ();
 
@@ -15,7 +15,7 @@ impl backend::Backend for DummyBackend {
     fn new_figure(&mut self, title: &str, size: &(f64, f64)) {
     }
 
-    fn draw_path(&mut self, color: &(f64, f64, f64, f64), path: &[(f64, f64)]) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         Ok(())
     }
 
