@@ -86,6 +86,14 @@ fn y_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
     (min, max)
 }
 
+fn prevent_null_interval((min, max): (f64, f64)) -> (f64, f64) {
+    if max == min {
+        (min - 0.5, max + 0.5)
+    } else {
+        (min, max)
+    }
+}
+
 impl PlotBuilder {
     pub fn new(one_series: Vec<(f64, f64)>) -> Self {
         Self { data: vec![one_series], xlims: None, ylims: None, p: Default::default() }
@@ -102,8 +110,8 @@ impl PlotBuilder {
         };
         Plot {
             data: self.data,
-            xlims,
-            ylims,
+            xlims: prevent_null_interval(xlims),
+            ylims: prevent_null_interval(ylims),
             p: self.p,
         }
     }
