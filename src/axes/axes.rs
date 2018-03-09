@@ -1,3 +1,5 @@
+use backend::Backend;
+use matplotrs_backend::Backend as BackendTrait;
 use matplotrs_backend;
 
 use color::Color;
@@ -30,6 +32,17 @@ impl Artist for Axes {
                 fill_color: self.a.facecolor.map(|Color(r, g, b, a)| (r, g, b, a)),
             },
         ]
+    }
+
+    fn render_children(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+        for artist in self.children.iter() {
+            let paths = artist.paths();
+            for path in paths {
+                be.draw_path(&path)?;
+            }
+            artist.render_children(be)?;
+        }
+        Ok(())
     }
 }
 

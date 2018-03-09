@@ -22,12 +22,13 @@ impl App {
             let title = fig.title().unwrap_or("Figure 1");
             let size = &fig.f.figsize;
             be.new_figure(title, size);
-            // TODO axes!
             for artist in fig.children.iter() {
-                let paths = (**artist).paths();
+                let paths = artist.paths();
                 for path in paths {
                     be.draw_path(&path)?;
                 }
+                // Draw inner objects for axis
+                artist.render_children(&mut be)?;
             }
         }
         be.show()
