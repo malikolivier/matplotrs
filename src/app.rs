@@ -21,7 +21,7 @@ impl App {
         for fig in self.figs.iter() {
             let title = fig.title().unwrap_or("Figure 1");
             let size = &fig.f.figsize;
-            be.new_figure(title, size);
+            be.new_figure(title, size)?;
             for artist in fig.children.iter() {
                 let paths = artist.paths();
                 for path in paths {
