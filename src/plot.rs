@@ -113,6 +113,12 @@ impl Artist for Plot {
         plot_paths.extend(self.yaxis.paths());
         plot_paths
     }
+
+    fn texts(&self) -> Vec<matplotrs_backend::Text> {
+        let mut texts = self.xaxis.texts();
+        texts.extend(self.yaxis.texts());
+        texts
+    }
 }
 
 impl Plot {
