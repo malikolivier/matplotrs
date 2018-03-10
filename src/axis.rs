@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 
 use matplotrs_backend;
 use artist::Artist;
-use color::{Color, BLACK};
 
 pub struct Axis {
     axis_type: AxisType,
@@ -44,14 +43,15 @@ impl Axis {
     }
 }
 
+const TICK_SIZE: f64 = 0.05;
+const AXIS_COLOR: Option<(f64, f64, f64, f64)> = Some((0.0, 0.0, 0.0, 1.0));
+
 impl Artist for Axis {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
         if !self.visible {
             // Empty path
             Vec::new()
         } else {
-            let Color(r, g, b, a) = BLACK;
-            let axis_color = Some((r, g, b, a));
             let mut paths = vec![
                 // Axis line
                 matplotrs_backend::Path {
@@ -60,23 +60,22 @@ impl Artist for Axis {
                         YAxis => vec![(-1.0, 1.0), (-1.0, -1.0)],
                     },
                     closed: false,
-                    line_color: axis_color,
+                    line_color: AXIS_COLOR,
                     fill_color: None,
                 }
             ];
-            const TICK_SIZE: f64 = 0.05;
             const TICK_COUNT: usize = 10;
             let tick_step = 2.0 / TICK_COUNT as f64;
-            // Each tick
+            // Make path for each tick
             let mut tick_pos = -1.0;
             for _ in 0..TICK_COUNT {
                 paths.push(matplotrs_backend::Path {
                     points: match self.axis_type {
                         XAxis => vec![(tick_pos, 1.0), (tick_pos, 1.0 + TICK_SIZE)],
-                        YAxis => vec![(-1.0, tick_pos), (-1.0 - TICK_SIZE, tick_pos)],
+                        YAxis => vec![(-1.0, -tick_pos), (-1.0 - TICK_SIZE, -tick_pos)],
                     },
                     closed: false,
-                    line_color: axis_color,
+                    line_color: AXIS_COLOR,
                     fill_color: None,
                 });
                 tick_pos += tick_step;
