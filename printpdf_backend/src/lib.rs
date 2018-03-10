@@ -112,9 +112,11 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                     clipping_bbox: None,
                 };
                 let pdf_image = Image::from(image_file);
+                let (wanted_w, wanted_h) = self.transform_size(&image.size);
+                let pdf_image_w = pdf_image.width(DEFAULT_DPI);
+                let pdf_image_h = pdf_image.height(DEFAULT_DPI);
                 let (x_pdf, y_pdf) = self.transform(&image.position);
-                // TODO add_to_layer!
-                pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, None, None, Some(DEFAULT_DPI));
+                pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, Some(wanted_w.0 / pdf_image_w.0), Some(wanted_h.0 / pdf_image_h.0), Some(DEFAULT_DPI));
                 Ok(())
             }
         }
@@ -139,6 +141,11 @@ impl PrintPdfBackend {
         (Mm(rightmost * (1.0 + x) / 2.0), Mm(upmost * (1.0 - y) / 2.0))
     }
 
+    fn transform_size(&self, &(along_x, along_y): &(f64, f64)) -> (Mm, Mm) {
+        let (Mm(rightmost), Mm(upmost)) = self.size.expect("Some size");
+        (Mm(along_x * rightmost / 2.0), Mm(along_y * upmost / 2.0))
+    }
+
     fn from_interpolation(interpolation: &matplotrs_backend::Interpolation) -> bool {
         use matplotrs_backend::Interpolation;
         match interpolation {
@@ -158,5 +165,20 @@ impl From<std::io::Error> for PdfError {
 impl From<printpdf::PrintpdfError> for PdfError {
     fn from(err: printpdf::PrintpdfError) -> Self {
         PdfError::PrintPdfError(err)
+    }
+}
+
+/// Trait used to add a few helper methods doing measurement on an Image instance
+trait MeasureImage {
+    fn width(&self, dpi: f64) -> Mm;
+    fn height(&self, dpi: f64) -> Mm;
+}
+
+impl MeasureImage for Image {
+    fn width(&self, dpi: f64) -> Mm {
+        self.image.width.into_pt(dpi).into()
+    }
+    fn height(&self, dpi: f64) -> Mm {
+        self.image.height.into_pt(dpi).into()
     }
 }
