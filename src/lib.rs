@@ -10,6 +10,7 @@ pub mod line;
 pub mod line_collection;
 pub mod plot;
 mod axis;
+pub mod image_view;
 
 pub extern crate matplotrs_backend;
 
