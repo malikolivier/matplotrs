@@ -116,7 +116,7 @@ impl Artist for Axis {
                         XAxis => (tick_pos, 1.0 + TICK_SIZE),
                         YAxis => (-1.0 - TICK_SIZE, tick_pos),
                     },
-                    text: format!("{}", tick_val),
+                    text: format!("{:.*}", 2, tick_val),
                     font_size: DEFAULT_FONT_SIZE,
                 });
             });
