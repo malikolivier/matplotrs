@@ -96,7 +96,7 @@ impl Default for PlotAttributes {
 
 impl Artist for Plot {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
-        self.data
+        let mut plot_paths: Vec<_> = self.data
             .iter()
             .map(|series| {
                 let Color(r, g, b, a) = series.edgecolor;
@@ -108,7 +108,10 @@ impl Artist for Plot {
                 };
                 self.transform_path(path)
             })
-            .collect()
+            .collect();
+        plot_paths.extend(self.xaxis.paths());
+        plot_paths.extend(self.yaxis.paths());
+        plot_paths
     }
 }
 
