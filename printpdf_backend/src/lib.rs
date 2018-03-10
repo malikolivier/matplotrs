@@ -5,12 +5,13 @@ extern crate printpdf;
 use std::fs::File;
 use std::io::BufWriter;
 
-use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm};
+use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm, BuiltinFont, IndirectFontRef};
 
 pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>,
     layer: Option<PdfLayerReference>,
     size: Option<(Mm, Mm)>,
+    default_font: Option<IndirectFontRef>,
 }
 
 #[derive(Debug)]
@@ -20,6 +21,8 @@ pub enum PdfError {
     IOError(std::io::Error),
 }
 
+const DEFAULT_FONT: BuiltinFont = BuiltinFont::TimesRoman;
+
 impl matplotrs_backend::Backend for PrintPdfBackend {
     type Err = PdfError;
     fn new() -> Self {
@@ -27,16 +30,19 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             doc: None,
             layer: None,
             size: None,
+            default_font: None,
         }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) {
+    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err> {
         match self.doc {
             None => {
                 let (doc, page1, layer1) = PdfDocument::new(title, Mm(size.0), Mm(size.1), "Layer 1");
                 let layer = doc.get_page(page1).get_layer(layer1);
+                let default_font = doc.add_builtin_font(DEFAULT_FONT)?;
                 self.doc = Some(doc);
                 self.layer = Some(layer);
+                self.default_font = Some(default_font);
             },
             Some(ref mut doc) => {
                 let (new_page, new_layer1) = doc.add_page(Mm(size.0), Mm(size.1), title);
@@ -44,6 +50,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             }
         }
         self.size = Some((Mm(size.0), Mm(size.1)));
+        Ok(())
     }
 
     fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
@@ -74,7 +81,19 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
     }
 
     fn draw_text(&mut self, text: &matplotrs_backend::Text) -> Result<(), Self::Err> {
-        Ok(())
+        match (self.layer.as_ref(), self.default_font.as_ref()) {
+            (None, _) => Err(PdfError::BackEndError("No layer!".to_owned())),
+            (_, None) => Err(PdfError::BackEndError("No font!".to_owned())),
+            (Some(layer), Some(font)) => {
+                let (x_pdf, y_pdf) = self.transform(&text.point);
+                layer.begin_text_section();
+                layer.set_font(&font, text.font_size as i64);
+                layer.set_text_cursor(x_pdf, y_pdf);
+                layer.write_text(text.text.as_str(), &font);
+                layer.end_text_section();
+                Ok(())
+            }
+        }
     }
 
     fn show(self)-> Result<i32, Self::Err> {

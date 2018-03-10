@@ -62,7 +62,7 @@ impl Artist for Axis {
                     closed: false,
                     line_color: AXIS_COLOR,
                     fill_color: None,
-                }
+                },
             ];
             const TICK_COUNT: usize = 10;
             let tick_step = 2.0 / TICK_COUNT as f64;
