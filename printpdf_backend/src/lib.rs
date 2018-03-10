@@ -5,7 +5,7 @@ extern crate printpdf;
 use std::fs::File;
 use std::io::BufWriter;
 
-use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm, BuiltinFont, IndirectFontRef};
+use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm, BuiltinFont, IndirectFontRef, ImageXObject, Image, Px, ColorSpace, ColorBits};
 
 pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>,
@@ -97,7 +97,25 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
     }
 
     fn draw_image(&mut self, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
-        unimplemented!()
+        match self.layer {
+            None => Err(PdfError::BackEndError("No layer!".to_owned())),
+            Some(ref layer) => {
+                let image_file = ImageXObject {
+                    width: Px(image.width),
+                    height: Px(image.height),
+                    color_space: ColorSpace::Rgb,
+                    bits_per_component: ColorBits::Bit8,
+                    interpolate: PrintPdfBackend::from_interpolation(&image.interpolation),
+                    image_data: image.data.clone(),
+                    image_filter: None,
+                    clipping_bbox: None,
+                };
+                let image = Image::from(image_file);
+                // TODO add_to_layer!
+                image.add_to_layer(layer.clone(), None, None, None, None, None, None);
+                Ok(())
+            }
+        }
     }
 
     fn show(self)-> Result<i32, Self::Err> {
@@ -117,6 +135,14 @@ impl PrintPdfBackend {
     fn transform(&self, &(x, y): &(f64, f64)) -> (Mm, Mm) {
         let (Mm(rightmost), Mm(upmost)) = self.size.expect("Some size");
         (Mm(rightmost * (1.0 + x) / 2.0), Mm(upmost * (1.0 - y) / 2.0))
+    }
+
+    fn from_interpolation(interpolation: &matplotrs_backend::Interpolation) -> bool {
+        use matplotrs_backend::Interpolation;
+        match interpolation {
+            &Interpolation::None => false,
+            &_                   => true,
+        }
     }
 }
 

@@ -22,11 +22,11 @@ pub struct Text {
 }
 
 pub struct Image {
-    width: usize,
-    height: usize,
-    color_space: ColorSpace,
-    interpolation: Interpolation,
-    data: Vec<u8>,
+    pub width: usize,
+    pub height: usize,
+    pub color_space: ColorSpace,
+    pub interpolation: Interpolation,
+    pub data: Vec<u8>,
 }
 
 pub enum ColorSpace {
