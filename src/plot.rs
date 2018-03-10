@@ -22,8 +22,7 @@ pub struct PlotBuilder {
     p: PlotAttributes,
 }
 
-pub struct PlotAttributes {
-}
+pub struct PlotAttributes {}
 
 impl PlotBuilder {
     /// Make a new plot builder with a single series
@@ -45,9 +44,15 @@ impl PlotBuilder {
             Some(ylims) => Axis::new_xaxis(ylims),
             None => Axis::new_yaxis_auto(&self.data),
         };
-        let all_series = self.data.into_iter().map(|one_series|
-            PlotSeries { data: one_series, edgecolor: BLACK }
-        ).collect();
+        let all_series = self.data
+            .into_iter()
+            .map(|one_series| {
+                PlotSeries {
+                    data: one_series,
+                    edgecolor: BLACK,
+                }
+            })
+            .collect();
         Plot {
             data: all_series,
             xaxis,
