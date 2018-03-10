@@ -37,8 +37,8 @@ impl ImageViewBuilder {
                 None => Axis::new_xaxis((0.0, self.data.len() as f64)),
             };
             let yaxis = match self.ylims {
-                Some(ylims) => Axis::new_xaxis(ylims),
-                None => Axis::new_xaxis((0.0, self.data[0].len() as f64)),
+                Some(ylims) => Axis::new_yaxis(ylims),
+                None => Axis::new_yaxis((0.0, self.data[0].len() as f64)),
             };
             Ok(ImageView {
                 data: self.data,
@@ -63,5 +63,19 @@ impl ImageViewBuilder {
 impl Default for ImageViewAttributes {
     fn default() -> Self {
         Self {}
+    }
+}
+
+impl Artist for ImageView {
+    fn paths(&self) -> Vec<matplotrs_backend::Path> {
+        let mut paths = self.xaxis.paths();
+        paths.extend(self.yaxis.paths());
+        paths
+    }
+
+    fn texts(&self) -> Vec<matplotrs_backend::Text> {
+        let mut texts = self.xaxis.texts();
+        texts.extend(self.yaxis.texts());
+        texts
     }
 }
