@@ -22,6 +22,7 @@ pub enum PdfError {
 }
 
 const DEFAULT_FONT: BuiltinFont = BuiltinFont::TimesRoman;
+const DEFAULT_DPI: f64 = 300.0;
 
 impl matplotrs_backend::Backend for PrintPdfBackend {
     type Err = PdfError;
@@ -113,7 +114,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                 let pdf_image = Image::from(image_file);
                 let (x_pdf, y_pdf) = self.transform(&image.position);
                 // TODO add_to_layer!
-                pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, None, None, None);
+                pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, None, None, Some(DEFAULT_DPI));
                 Ok(())
             }
         }
