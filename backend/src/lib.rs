@@ -24,15 +24,9 @@ pub struct Text {
 pub struct Image {
     pub width: usize,
     pub height: usize,
-    pub color_space: ColorSpace,
     pub interpolation: Interpolation,
+    /// RGB data (row-major). Each pixel is 3 bytes long (RGB).
     pub data: Vec<u8>,
-}
-
-pub enum ColorSpace {
-    Greyscale,
-    Rgba,
-    Rgb,
 }
 
 pub enum Interpolation {
