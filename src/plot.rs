@@ -106,6 +106,7 @@ fn prevent_null_interval((min, max): (f64, f64)) -> (f64, f64) {
 }
 
 impl PlotBuilder {
+    /// Make a new plot builder with a single series
     pub fn new(one_series: Vec<(f64, f64)>) -> Self {
         Self {
             data: vec![one_series],
@@ -135,6 +136,7 @@ impl PlotBuilder {
         }
     }
 
+    /// Make a new plot builder starting with several series
     pub fn new_multi_series(multi_series: Vec<Vec<(f64, f64)>>) -> Self {
         Self {
             data: multi_series,
@@ -151,6 +153,12 @@ impl PlotBuilder {
 
     pub fn with_ylims(mut self, ylims: (f64, f64)) -> Self {
         self.ylims = Some(ylims);
+        self
+    }
+
+    /// Add a new series to the plot
+    pub fn with_new_series(mut self, one_series: Vec<(f64, f64)>) -> Self {
+        self.data.push(one_series);
         self
     }
 }
