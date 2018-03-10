@@ -1,15 +1,12 @@
 use matplotrs_backend;
 
-pub struct DummyBackend {
-    fig: (),
-}
+pub struct DummyBackend;
 
 impl matplotrs_backend::Backend for DummyBackend {
     type Err = !;
-    type Figure = ();
 
     fn new() -> Self {
-        DummyBackend { fig: () }
+        DummyBackend
     }
 
     fn new_figure(&mut self, _title: &str, _size: &(f64, f64)) {}

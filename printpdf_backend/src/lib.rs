@@ -22,7 +22,6 @@ pub enum PdfError {
 
 impl matplotrs_backend::Backend for PrintPdfBackend {
     type Err = PdfError;
-    type Figure = PdfDocumentReference;
     fn new() -> Self {
         PrintPdfBackend {
             doc: None,
@@ -71,6 +70,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             layer.set_outline_color(line_color);
         }
         layer.add_shape(line);
+        Ok(())
+    }
+
+    fn draw_text(&mut self, text: &matplotrs_backend::Text) -> Result<(), Self::Err> {
         Ok(())
     }
 
