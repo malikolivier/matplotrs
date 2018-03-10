@@ -42,6 +42,8 @@ impl Axis {
         Self::new_yaxis(lims)
     }
 
+    /// Iterate over tick positions in the coordinates of the contained axes
+    /// (-1 to +1)
     fn for_each_tick_positions<F>(&self, mut f: F)
     where F: FnMut(f64)
     {
@@ -57,6 +59,8 @@ const TICK_COUNT: usize = 10;
 const TICK_SIZE: f64 = 0.05;
 const AXIS_COLOR: Option<(f64, f64, f64, f64)> = Some((0.0, 0.0, 0.0, 1.0));
 const TICK_STEP: f64 = 2.0 / TICK_COUNT as f64;
+
+const DEFAULT_FONT_SIZE: f32 = 10.0;
 
 impl Artist for Axis {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
@@ -93,8 +97,22 @@ impl Artist for Axis {
     }
 
     fn texts(&self) -> Vec<matplotrs_backend::Text> {
-        // TODO
-        unimplemented!()
+        if !self.visible {
+            Vec::new()
+        } else {
+            let mut texts = Vec::new();
+            self.for_each_tick_positions(|tick_pos| {
+                texts.push(matplotrs_backend::Text {
+                    point: match self.axis_type {
+                        XAxis => (tick_pos, 1.0 + TICK_SIZE),
+                        YAxis => (-1.0 - TICK_SIZE, -tick_pos),
+                    },
+                    text: format!("{}", tick_pos),
+                    font_size: DEFAULT_FONT_SIZE,
+                });
+            });
+            texts
+        }
     }
 }
 
