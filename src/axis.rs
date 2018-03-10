@@ -41,10 +41,22 @@ impl Axis {
         let lims = y_min_max(data);
         Self::new_yaxis(lims)
     }
+
+    fn for_each_tick_positions<F>(&self, mut f: F)
+    where F: FnMut(f64)
+    {
+        let mut tick_pos = -1.0;
+        for _ in 0..TICK_COUNT {
+            f(tick_pos);
+            tick_pos += TICK_STEP;
+        }
+    }
 }
 
+const TICK_COUNT: usize = 10;
 const TICK_SIZE: f64 = 0.05;
 const AXIS_COLOR: Option<(f64, f64, f64, f64)> = Some((0.0, 0.0, 0.0, 1.0));
+const TICK_STEP: f64 = 2.0 / TICK_COUNT as f64;
 
 impl Artist for Axis {
     fn paths(&self) -> Vec<matplotrs_backend::Path> {
@@ -64,11 +76,8 @@ impl Artist for Axis {
                     fill_color: None,
                 },
             ];
-            const TICK_COUNT: usize = 10;
-            let tick_step = 2.0 / TICK_COUNT as f64;
             // Make path for each tick
-            let mut tick_pos = -1.0;
-            for _ in 0..TICK_COUNT {
+            self.for_each_tick_positions(|tick_pos| {
                 paths.push(matplotrs_backend::Path {
                     points: match self.axis_type {
                         XAxis => vec![(tick_pos, 1.0), (tick_pos, 1.0 + TICK_SIZE)],
@@ -78,8 +87,7 @@ impl Artist for Axis {
                     line_color: AXIS_COLOR,
                     fill_color: None,
                 });
-                tick_pos += tick_step;
-            }
+            });
             paths
         }
     }
