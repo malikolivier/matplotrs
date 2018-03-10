@@ -45,14 +45,15 @@ impl Axis {
     /// Run a function over tick positions in the coordinates of the contained axes
     /// (-1 to +1) and the values of the ticks
     fn for_each_tick_positions<F>(&self, mut f: F)
-    where F: FnMut(f64, f64)
+    where
+        F: FnMut(f64, f64),
     {
         if TICK_COUNT == 0 {
             return;
         }
         let (mut tick_pos, tick_step) = match self.axis_type {
-            XAxis => (-1.0,  TICK_STEP),
-            YAxis => ( 1.0, -TICK_STEP),
+            XAxis => (-1.0, TICK_STEP),
+            YAxis => (1.0, -TICK_STEP),
         };
         let mut tick_val = self.lims.0;
         let tick_val_step = (self.lims.1 - self.lims.0) / TICK_COUNT as f64;

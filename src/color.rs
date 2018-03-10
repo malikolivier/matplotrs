@@ -98,8 +98,13 @@ impl Gradient {
 /// version.
 
 macro_rules! make_color {
-	($r:expr, $g:expr, $b:expr) => ( Color($r as f64 / 255.0, $g as f64 / 255.0, $b as f64 / 255.0, 1.0));
-	($r:expr, $g:expr, $b:expr, $a:expr) => ( Color($r as f64 / 255.0, $g as f64 / 255.0, $b as f64 / 255.0, $a as f64 / 255.0));
+    ($r:expr, $g:expr, $b:expr) => ( Color($r as f64 / 255.0,
+                                           $g as f64 / 255.0,
+                                           $b as f64 / 255.0, 1.0));
+    ($r:expr, $g:expr, $b:expr, $a:expr) => ( Color($r as f64 / 255.0,
+                                                    $g as f64 / 255.0,
+                                                    $b as f64 / 255.0,
+                                                    $a as f64 / 255.0));
 }
 
 /// Scarlet Red - Light - #EF2929
