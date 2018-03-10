@@ -36,14 +36,12 @@ impl Artist for Axes {
 
     fn render_children(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
         for artist in self.children.iter() {
-            let paths = artist.paths();
-            for path in paths {
+            for path in artist.paths() {
                 // Need to transform path's position for it to be used here!
                 let path = self.transform_path(path);
                 be.draw_path(&path)?;
             }
-            let texts = artist.texts();
-            for text in texts {
+            for text in artist.texts() {
                 let text = self.transform_text(text);
                 be.draw_text(&text)?;
             }

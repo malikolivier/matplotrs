@@ -23,13 +23,14 @@ impl App {
             let size = &fig.f.figsize;
             be.new_figure(title, size)?;
             for artist in fig.children.iter() {
-                let paths = artist.paths();
-                for path in paths {
+                for path in artist.paths() {
                     be.draw_path(&path)?;
                 }
-                let texts = artist.texts();
-                for text in texts {
+                for text in artist.texts() {
                     be.draw_text(&text)?;
+                }
+                for image in artist.images() {
+                    be.draw_image(&image)?;
                 }
                 // Draw inner objects for axis
                 artist.render_children(&mut be)?;

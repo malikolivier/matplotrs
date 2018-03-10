@@ -10,6 +10,10 @@ pub trait Artist {
         Vec::new()
     }
 
+    fn images(&self) -> Vec<matplotrs_backend::Image> {
+        Vec::new()
+    }
+
     /// Do nothing. Override if the type has children that should be rendered
     fn render_children(&self, _be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
         Ok(())
