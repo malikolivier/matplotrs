@@ -1,12 +1,12 @@
 use matplotrs_backend;
 use color::{Color, BLACK};
-use std::cmp::Ordering;
 use artist::Artist;
+use axis::Axis;
 
 pub struct Plot {
     data: Vec<PlotSeries>,
-    xlims: (f64, f64),
-    ylims: (f64, f64),
+    xaxis: Axis,
+    yaxis: Axis,
     p: PlotAttributes,
 }
 
@@ -25,86 +25,6 @@ pub struct PlotBuilder {
 pub struct PlotAttributes {
 }
 
-trait MinMaxWith<T>: IntoIterator<Item = T> {
-    fn min_with<F>(&self, f: F) -> Option<&T>
-    where
-        F: Fn(&T, &T) -> Ordering;
-    fn max_with<F>(&self, f: F) -> Option<&T>
-    where
-        F: Fn(&T, &T) -> Ordering,
-    {
-        self.min_with(|x1, x2| f(x1, x2).reverse())
-    }
-}
-
-impl<T> MinMaxWith<T> for Vec<T> {
-    fn min_with<F>(&self, f: F) -> Option<&T>
-    where
-        F: Fn(&T, &T) -> Ordering,
-    {
-        if self.is_empty() {
-            None
-        } else {
-            let vec = self.as_slice();
-            let mut min = &vec[0];
-            for item in vec.iter().skip(1) {
-                if let Ordering::Less = f(item, &min) {
-                    min = item;
-                }
-            }
-            Some(min)
-        }
-    }
-}
-
-fn tuple_partial_cmp_x(&(x1, _y1): &(f64, f64), &(x2, _y2): &(f64, f64)) -> Ordering {
-    x1.partial_cmp(&x2).unwrap_or(Ordering::Less)
-}
-
-fn tuple_partial_cmp_y(&(_x1, y1): &(f64, f64), &(_x2, y2): &(f64, f64)) -> Ordering {
-    y1.partial_cmp(&y2).unwrap_or(Ordering::Less)
-}
-
-fn x_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
-    let mut min = 0.0;
-    let mut max = 0.0;
-    for single_series in series {
-        single_series.min_with(tuple_partial_cmp_x).map(|&(x_min,
-           _y_min)| {
-            min = x_min;
-        });
-        single_series.max_with(tuple_partial_cmp_x).map(|&(x_max,
-           _y_max)| {
-            max = x_max;
-        });
-    }
-    (min, max)
-}
-
-fn y_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
-    let mut min = 0.0;
-    let mut max = 0.0;
-    for single_series in series {
-        single_series.min_with(tuple_partial_cmp_y).map(|&(_x_min,
-           y_min)| {
-            min = y_min;
-        });
-        single_series.max_with(tuple_partial_cmp_y).map(|&(_x_max,
-           y_max)| {
-            max = y_max;
-        });
-    }
-    (min, max)
-}
-
-fn prevent_null_interval((min, max): (f64, f64)) -> (f64, f64) {
-    if max == min {
-        (min - 0.5, max + 0.5)
-    } else {
-        (min, max)
-    }
-}
-
 impl PlotBuilder {
     /// Make a new plot builder with a single series
     pub fn new(one_series: Vec<(f64, f64)>) -> Self {
@@ -117,21 +37,21 @@ impl PlotBuilder {
     }
 
     pub fn build(self) -> Plot {
-        let xlims = match self.xlims {
-            Some(xlims) => xlims,
-            None => x_min_max(&self.data),
+        let xaxis = match self.xlims {
+            Some(xlims) => Axis::new_xaxis(xlims),
+            None => Axis::new_xaxis_auto(&self.data),
         };
-        let ylims = match self.ylims {
-            Some(ylims) => ylims,
-            None => y_min_max(&self.data),
+        let yaxis = match self.ylims {
+            Some(ylims) => Axis::new_xaxis(ylims),
+            None => Axis::new_yaxis_auto(&self.data),
         };
         let all_series = self.data.into_iter().map(|one_series|
             PlotSeries { data: one_series, edgecolor: BLACK }
         ).collect();
         Plot {
             data: all_series,
-            xlims: prevent_null_interval(xlims),
-            ylims: prevent_null_interval(ylims),
+            xaxis,
+            yaxis,
             p: self.p,
         }
     }
@@ -190,8 +110,8 @@ impl Artist for Plot {
 impl Plot {
     /// Transform plot path to make xlims and ylims fit into [-1, 1]
     fn transform_path(&self, mut path: matplotrs_backend::Path) -> matplotrs_backend::Path {
-        let (xmin, xmax) = self.xlims;
-        let (ymin, ymax) = self.ylims;
+        let &(xmin, xmax) = self.xlims();
+        let &(ymin, ymax) = self.ylims();
         for point in path.points.iter_mut() {
             let (px, py) = *point;
             *point = (
@@ -200,5 +120,13 @@ impl Plot {
             );
         }
         path
+    }
+
+    fn xlims(&self) -> &(f64, f64) {
+        &self.xaxis.lims
+    }
+
+    fn ylims(&self) -> &(f64, f64) {
+        &self.yaxis.lims
     }
 }

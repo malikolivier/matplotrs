@@ -1,0 +1,122 @@
+use std::cmp::Ordering;
+
+pub struct Axis {
+    axis_type: AxisType,
+    pub lims: (f64, f64),
+    visible: bool,
+}
+
+enum AxisType {
+    XAxis,
+    YAxis,
+}
+use self::AxisType::*;
+
+impl Axis {
+    pub fn new_xaxis(lims: (f64, f64)) -> Self {
+        Self {
+            axis_type: XAxis,
+            lims: prevent_null_interval(lims),
+            visible: true,
+        }
+    }
+
+    pub fn new_yaxis(lims: (f64, f64)) -> Self {
+        Self {
+            axis_type: YAxis,
+            lims: prevent_null_interval(lims),
+            visible: true,
+        }
+    }
+
+    pub fn new_xaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
+        let lims = x_min_max(data);
+        Self::new_xaxis(lims)
+    }
+
+    pub fn new_yaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
+        let lims = y_min_max(data);
+        Self::new_yaxis(lims)
+    }
+}
+
+
+trait MinMaxWith<T>: IntoIterator<Item = T> {
+    fn min_with<F>(&self, f: F) -> Option<&T>
+    where
+        F: Fn(&T, &T) -> Ordering;
+    fn max_with<F>(&self, f: F) -> Option<&T>
+    where
+        F: Fn(&T, &T) -> Ordering,
+    {
+        self.min_with(|x1, x2| f(x1, x2).reverse())
+    }
+}
+
+impl<T> MinMaxWith<T> for Vec<T> {
+    fn min_with<F>(&self, f: F) -> Option<&T>
+    where
+        F: Fn(&T, &T) -> Ordering,
+    {
+        if self.is_empty() {
+            None
+        } else {
+            let vec = self.as_slice();
+            let mut min = &vec[0];
+            for item in vec.iter().skip(1) {
+                if let Ordering::Less = f(item, &min) {
+                    min = item;
+                }
+            }
+            Some(min)
+        }
+    }
+}
+
+fn tuple_partial_cmp_x(&(x1, _y1): &(f64, f64), &(x2, _y2): &(f64, f64)) -> Ordering {
+    x1.partial_cmp(&x2).unwrap_or(Ordering::Less)
+}
+
+fn tuple_partial_cmp_y(&(_x1, y1): &(f64, f64), &(_x2, y2): &(f64, f64)) -> Ordering {
+    y1.partial_cmp(&y2).unwrap_or(Ordering::Less)
+}
+
+fn x_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
+    let mut min = 0.0;
+    let mut max = 0.0;
+    for single_series in series {
+        single_series.min_with(tuple_partial_cmp_x).map(|&(x_min,
+           _y_min)| {
+            min = x_min;
+        });
+        single_series.max_with(tuple_partial_cmp_x).map(|&(x_max,
+           _y_max)| {
+            max = x_max;
+        });
+    }
+    (min, max)
+}
+
+fn y_min_max(series: &Vec<Vec<(f64, f64)>>) -> (f64, f64) {
+    let mut min = 0.0;
+    let mut max = 0.0;
+    for single_series in series {
+        single_series.min_with(tuple_partial_cmp_y).map(|&(_x_min,
+           y_min)| {
+            min = y_min;
+        });
+        single_series.max_with(tuple_partial_cmp_y).map(|&(_x_max,
+           y_max)| {
+            max = y_max;
+        });
+    }
+    (min, max)
+}
+
+fn prevent_null_interval((min, max): (f64, f64)) -> (f64, f64) {
+    if max == min {
+        (min - 0.5, max + 0.5)
+    } else {
+        (min, max)
+    }
+}
