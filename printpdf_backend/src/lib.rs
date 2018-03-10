@@ -96,6 +96,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         }
     }
 
+    fn draw_image(&mut self, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+        unimplemented!()
+    }
+
     fn show(self)-> Result<i32, Self::Err> {
         match self.doc {
             None => Err(PdfError::BackEndError("No figure created!".to_owned())),

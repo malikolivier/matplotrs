@@ -4,6 +4,7 @@ pub trait Backend {
     fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err>;
     fn draw_path(&mut self, path: &Path) -> Result<(), Self::Err>;
     fn draw_text(&mut self, text: &Text) -> Result<(), Self::Err>;
+    fn draw_image(&mut self, image: &Image) -> Result<(), Self::Err>;
     fn show(self) -> Result<i32, Self::Err>;
 }
 
@@ -18,4 +19,24 @@ pub struct Text {
     pub point: (f64, f64),
     pub text: String,
     pub font_size: f32,
+}
+
+pub struct Image {
+    width: usize,
+    height: usize,
+    color_space: ColorSpace,
+    interpolation: Interpolation,
+    data: Vec<u8>,
+}
+
+pub enum ColorSpace {
+    Greyscale,
+    Rgba,
+    Rgb,
+}
+
+pub enum Interpolation {
+    None,
+    Linear,
+    Quadratic,
 }
