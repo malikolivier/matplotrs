@@ -83,6 +83,11 @@ impl Artist for Axis {
             paths
         }
     }
+
+    fn texts(&self) -> Vec<matplotrs_backend::Text> {
+        // TODO
+        unimplemented!()
+    }
 }
 
 trait MinMaxWith<T>: IntoIterator<Item = T> {

@@ -42,6 +42,11 @@ impl Artist for Axes {
                 let path = self.transform_path(path);
                 be.draw_path(&path)?;
             }
+            let texts = artist.texts();
+            for text in texts {
+                let text = self.transform_text(text);
+                be.draw_text(&text)?;
+            }
             artist.render_children(be)?;
         }
         Ok(())
@@ -99,5 +104,13 @@ impl Axes {
             *point = (x + dx / 2.0 * (1.0 + px), y + dy / 2.0 * (1.0 + py));
         }
         path
+    }
+
+    /// Transform child's text to parent's coordinate system
+    fn transform_text(&self, mut text: matplotrs_backend::Text) -> matplotrs_backend::Text {
+        let [x, y, dx, dy] = self.a.rect;
+        let (px, py) = text.point;
+        text.point = (x + dx / 2.0 * (1.0 + px), y + dy / 2.0 * (1.0 + py));
+        text
     }
 }

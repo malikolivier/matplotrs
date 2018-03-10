@@ -27,6 +27,10 @@ impl App {
                 for path in paths {
                     be.draw_path(&path)?;
                 }
+                let texts = artist.texts();
+                for text in texts {
+                    be.draw_text(&text)?;
+                }
                 // Draw inner objects for axis
                 artist.render_children(&mut be)?;
             }
