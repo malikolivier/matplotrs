@@ -27,6 +27,11 @@ pub struct Image {
     pub interpolation: Interpolation,
     /// RGB data (row-major). Each pixel is 3 bytes long (RGB).
     pub data: Vec<u8>,
+    /// Position of lower-left corner (in container's coordinates, from -1 to +1)
+    pub position: (f64, f64),
+    /// Actual size when displayed. The image will be scaled to be exactly this size in the
+    /// container's coordinates
+    pub size: (f64, f64),
 }
 
 pub enum Interpolation {

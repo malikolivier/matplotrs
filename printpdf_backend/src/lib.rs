@@ -110,9 +110,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                     image_filter: None,
                     clipping_bbox: None,
                 };
-                let image = Image::from(image_file);
+                let pdf_image = Image::from(image_file);
+                let (x_pdf, y_pdf) = self.transform(&image.position);
                 // TODO add_to_layer!
-                image.add_to_layer(layer.clone(), None, None, None, None, None, None);
+                pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, None, None, None);
                 Ok(())
             }
         }
