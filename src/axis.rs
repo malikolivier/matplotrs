@@ -42,15 +42,21 @@ impl Axis {
         Self::new_yaxis(lims)
     }
 
-    /// Iterate over tick positions in the coordinates of the contained axes
-    /// (-1 to +1)
+    /// Run a function over tick positions in the coordinates of the contained axes
+    /// (-1 to +1) and the values of the ticks
     fn for_each_tick_positions<F>(&self, mut f: F)
-    where F: FnMut(f64)
+    where F: FnMut(f64, f64)
     {
+        if TICK_COUNT == 0 {
+            return;
+        }
         let mut tick_pos = -1.0;
+        let mut tick_val = self.lims.0;
+        let tick_val_step = (self.lims.1 - self.lims.0) / TICK_COUNT as f64;
         for _ in 0..TICK_COUNT {
-            f(tick_pos);
+            f(tick_pos, tick_val);
             tick_pos += TICK_STEP;
+            tick_val += tick_val_step;
         }
     }
 }
@@ -81,7 +87,7 @@ impl Artist for Axis {
                 },
             ];
             // Make path for each tick
-            self.for_each_tick_positions(|tick_pos| {
+            self.for_each_tick_positions(|tick_pos, _| {
                 paths.push(matplotrs_backend::Path {
                     points: match self.axis_type {
                         XAxis => vec![(tick_pos, 1.0), (tick_pos, 1.0 + TICK_SIZE)],
@@ -101,13 +107,13 @@ impl Artist for Axis {
             Vec::new()
         } else {
             let mut texts = Vec::new();
-            self.for_each_tick_positions(|tick_pos| {
+            self.for_each_tick_positions(|tick_pos, tick_val| {
                 texts.push(matplotrs_backend::Text {
                     point: match self.axis_type {
                         XAxis => (tick_pos, 1.0 + TICK_SIZE),
                         YAxis => (-1.0 - TICK_SIZE, -tick_pos),
                     },
-                    text: format!("{}", tick_pos),
+                    text: format!("{}", tick_val),
                     font_size: DEFAULT_FONT_SIZE,
                 });
             });
