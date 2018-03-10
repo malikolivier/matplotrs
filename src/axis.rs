@@ -50,12 +50,15 @@ impl Axis {
         if TICK_COUNT == 0 {
             return;
         }
-        let mut tick_pos = -1.0;
+        let (mut tick_pos, tick_step) = match self.axis_type {
+            XAxis => (-1.0,  TICK_STEP),
+            YAxis => ( 1.0, -TICK_STEP),
+        };
         let mut tick_val = self.lims.0;
         let tick_val_step = (self.lims.1 - self.lims.0) / TICK_COUNT as f64;
         for _ in 0..TICK_COUNT {
             f(tick_pos, tick_val);
-            tick_pos += TICK_STEP;
+            tick_pos += tick_step;
             tick_val += tick_val_step;
         }
     }
@@ -91,7 +94,7 @@ impl Artist for Axis {
                 paths.push(matplotrs_backend::Path {
                     points: match self.axis_type {
                         XAxis => vec![(tick_pos, 1.0), (tick_pos, 1.0 + TICK_SIZE)],
-                        YAxis => vec![(-1.0, -tick_pos), (-1.0 - TICK_SIZE, -tick_pos)],
+                        YAxis => vec![(-1.0, tick_pos), (-1.0 - TICK_SIZE, tick_pos)],
                     },
                     closed: false,
                     line_color: AXIS_COLOR,
@@ -111,7 +114,7 @@ impl Artist for Axis {
                 texts.push(matplotrs_backend::Text {
                     point: match self.axis_type {
                         XAxis => (tick_pos, 1.0 + TICK_SIZE),
-                        YAxis => (-1.0 - TICK_SIZE, -tick_pos),
+                        YAxis => (-1.0 - TICK_SIZE, tick_pos),
                     },
                     text: format!("{}", tick_val),
                     font_size: DEFAULT_FONT_SIZE,
