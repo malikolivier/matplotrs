@@ -123,8 +123,8 @@ impl ImageView {
     fn raw_rgb(&self) -> Vec<u8> {
         let mut raw = Vec::with_capacity(3 * self.data.len());
         let (vmin, vmax) = self.vlims;
-        for line in self.data.iter() {
-            for val in line.iter() {
+        for row in self.data.iter() {
+            for val in row.iter() {
                 let mut normalized_val = (*val - vmin) / (vmax - vmin);
                 if normalized_val < 0.0 {
                     normalized_val = 0.0;
