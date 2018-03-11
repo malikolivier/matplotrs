@@ -49,9 +49,7 @@ where
         F: Fn(&T, &T) -> Ordering;
 
     fn min_max(&self) -> Option<(&T, &T)> {
-        self.min_max_with(|v1: &T, v2: &T| {
-            v1.partial_cmp(&v2).unwrap_or(Ordering::Less)
-        })
+        self.min_max_with(|v1: &T, v2: &T| v1.partial_cmp(&v2).unwrap_or(Ordering::Less))
     }
 }
 
