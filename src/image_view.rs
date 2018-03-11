@@ -1,6 +1,8 @@
 use matplotrs_backend;
 use artist::Artist;
 use axis::Axis;
+use color::{WHITE, BLACK, Color};
+use color_lut::ColorLUT;
 
 pub struct ImageView {
     data: Vec<Vec<f64>>,
@@ -20,6 +22,7 @@ pub struct ImageViewBuilder {
 
 pub struct ImageViewAttributes {
     interpolation: matplotrs_backend::Interpolation,
+    lut: ColorLUT,
 }
 
 impl ImageViewBuilder {
@@ -68,13 +71,23 @@ impl ImageViewBuilder {
 
 impl Default for ImageViewAttributes {
     fn default() -> Self {
-        Self { interpolation: matplotrs_backend::Interpolation::None }
+        Self {
+            interpolation: matplotrs_backend::Interpolation::None,
+            lut: ColorLUT::linear(vec![(0.0, BLACK), (1.0, WHITE)]),
+         }
     }
 }
 
 impl ImageView {
     fn raw_rgb(&self) -> Vec<u8> {
-        vec![160u8; 3 * 10_000]
+        let mut raw = Vec::with_capacity(3 * self.data.len());
+        for line in self.data.iter() {
+            for point in line.iter() {
+                let bytes = self.i.lut.color_at(*point).bytes_rgb();
+                raw.extend(&bytes);
+            }
+        }
+        raw
     }
 }
 

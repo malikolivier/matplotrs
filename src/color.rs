@@ -68,27 +68,15 @@ impl Color {
     pub fn set_blue<B: Into<f64>>(&mut self, b: B) {
         self.2 = b.into();
     }
-}
 
-/// Linear or Radial Gradient.
-#[derive(Clone, Debug)]
-pub enum Gradient {
-    /// Takes a series of color stops that indicate how to interpolate between the colors
-    Linear(Vec<(f64, Color)>),
-}
-
-impl Gradient {
-    /// Create a linear gradient.
-    pub fn linear<T: Into<f64>>(colors: Vec<(T, Color)>) -> Gradient {
-        let mut vec = Vec::with_capacity(colors.len());
-        for (c, color) in colors {
-            vec.push((c.into(), color))
-        }
-        Gradient::Linear(vec)
+    pub fn bytes_rgb(&self) -> [u8; 3] {
+        [f64_to_byte(self.0), f64_to_byte(self.1), f64_to_byte(self.2)]
     }
 }
 
-
+fn f64_to_byte(x: f64) -> u8 {
+    (x * 255.0) as u8
+}
 
 /// Built-in colors.
 ///

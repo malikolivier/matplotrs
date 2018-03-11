@@ -11,7 +11,7 @@ fn main() {
     let mut app = App::new();
     let mut fig = Figure::new();
     let mut axes = AxesBuilder::new().with_edgecolor(BROWN).build();
-    let image = ImageViewBuilder::new(vec![vec![10f64; 100]; 100], (100, 100))
+    let image = ImageViewBuilder::new(vec![vec![0.9; 100]; 100], (100, 100))
         .build()
         .unwrap();
     axes.add_child(image);

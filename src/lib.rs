@@ -11,6 +11,7 @@ pub mod line_collection;
 pub mod plot;
 mod axis;
 pub mod image_view;
+pub mod color_lut;
 
 pub extern crate matplotrs_backend;
 
