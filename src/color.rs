@@ -70,7 +70,11 @@ impl Color {
     }
 
     pub fn bytes_rgb(&self) -> [u8; 3] {
-        [f64_to_byte(self.0), f64_to_byte(self.1), f64_to_byte(self.2)]
+        [
+            f64_to_byte(self.0),
+            f64_to_byte(self.1),
+            f64_to_byte(self.2),
+        ]
     }
 }
 

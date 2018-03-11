@@ -3,7 +3,7 @@ use color::Color;
 pub enum ColorLUT {
     /// Linear gradient
     /// Takes a series of color stops that indicate how to interpolate between the colors
-    LinearGradient(Vec<(f64, Color)>)
+    LinearGradient(Vec<(f64, Color)>),
 }
 
 impl ColorLUT {
@@ -28,9 +28,11 @@ impl ColorLUT {
                         let dv = v2 - v1;
                         let dp = point - v1;
                         let coef = dp / dv;
-                        return Color::rgb(r1 + (r2 - r1) * coef,
-                                          g1 + (g2 - g1) * coef,
-                                          b1 + (b2 - b1) * coef);
+                        return Color::rgb(
+                            r1 + (r2 - r1) * coef,
+                            g1 + (g2 - g1) * coef,
+                            b1 + (b2 - b1) * coef,
+                        );
                     }
                 }
                 Color::rgb(0.0, 0.0, 0.0)

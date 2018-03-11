@@ -74,7 +74,7 @@ impl Default for ImageViewAttributes {
         Self {
             interpolation: matplotrs_backend::Interpolation::None,
             lut: ColorLUT::linear(vec![(0.0, BLACK), (1.0, WHITE)]),
-         }
+        }
     }
 }
 
