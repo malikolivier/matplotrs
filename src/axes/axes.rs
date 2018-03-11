@@ -45,6 +45,10 @@ impl Artist for Axes {
                 let text = self.transform_text(text);
                 be.draw_text(&text)?;
             }
+            for image in artist.images() {
+                //let text = self.transform_text(text);
+                be.draw_image(&image)?;
+            }
             artist.render_children(be)?;
         }
         Ok(())

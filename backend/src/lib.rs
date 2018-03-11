@@ -34,6 +34,7 @@ pub struct Image {
     pub size: (f64, f64),
 }
 
+#[derive(Copy, Clone)]
 pub enum Interpolation {
     None,
     Linear,

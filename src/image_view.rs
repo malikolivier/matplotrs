@@ -6,6 +6,7 @@ pub struct ImageView {
     data: Vec<Vec<f64>>,
     xaxis: Axis,
     yaxis: Axis,
+    shape: (usize, usize),
     i: ImageViewAttributes,
 }
 
@@ -13,17 +14,21 @@ pub struct ImageViewBuilder {
     data: Vec<Vec<f64>>,
     xlims: Option<(f64, f64)>,
     ylims: Option<(f64, f64)>,
+    shape: (usize, usize),
     i: ImageViewAttributes,
 }
 
-pub struct ImageViewAttributes {}
+pub struct ImageViewAttributes {
+    interpolation: matplotrs_backend::Interpolation,
+}
 
 impl ImageViewBuilder {
-    pub fn new(image: Vec<Vec<f64>>) -> Self {
+    pub fn new(image: Vec<Vec<f64>>, shape: (usize, usize)) -> Self {
         Self {
             data: image,
             xlims: None,
             ylims: None,
+            shape: shape,
             i: Default::default(),
         }
     }
@@ -44,6 +49,7 @@ impl ImageViewBuilder {
                 data: self.data,
                 xaxis,
                 yaxis,
+                shape: self.shape,
                 i: self.i,
             })
         }
@@ -62,7 +68,15 @@ impl ImageViewBuilder {
 
 impl Default for ImageViewAttributes {
     fn default() -> Self {
-        Self {}
+        Self {
+            interpolation: matplotrs_backend::Interpolation::None,
+        }
+    }
+}
+
+impl ImageView {
+    fn raw_rgb(&self) -> Vec<u8> {
+        Vec::new()
     }
 }
 
@@ -77,5 +91,18 @@ impl Artist for ImageView {
         let mut texts = self.xaxis.texts();
         texts.extend(self.yaxis.texts());
         texts
+    }
+
+    fn images(&self) -> Vec<matplotrs_backend::Image> {
+        vec![
+            matplotrs_backend::Image {
+                width: self.shape.0,
+                height: self.shape.1,
+                interpolation: self.i.interpolation,
+                data: self.raw_rgb(),
+                position: (-1.0, -1.0), // bottom-left corner
+                size: (2.0, 2.0), // Fill complete axes
+            }
+        ]
     }
 }
