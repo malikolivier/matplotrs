@@ -43,7 +43,7 @@ impl ImageViewBuilder {
         }
     }
 
-    // Assumes data is row-major
+    /// Assumes data is row-major
     pub fn new_from_linear_data<T>(data: Vec<T>, shape: (usize, usize)) -> Result<Self, String>
     where
         T: Into<f64>,
