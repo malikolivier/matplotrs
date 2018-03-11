@@ -66,13 +66,23 @@ impl ImageViewBuilder {
         if self.data.is_empty() || (!self.data.is_empty() && self.data[0].is_empty()) {
             Err("The provided array is empty!".to_owned())
         } else {
+            let (width, height) = self.data.shape();
+            let (disp_width, disp_height) = compute_size_within_container((width, height));
             let xaxis = match self.xlims {
                 Some(xlims) => Axis::new_xaxis(xlims),
-                None => Axis::new_xaxis((0.0, self.data[0].len() as f64)),
+                None => Axis::new_xaxis((0.0, if width > height {
+                            width as f64
+                        } else {
+                            width as f64 * 2.0 / disp_width
+                        }))
             };
             let yaxis = match self.ylims {
                 Some(ylims) => Axis::new_yaxis(ylims),
-                None => Axis::new_yaxis((0.0, self.data.len() as f64)),
+                None => Axis::new_yaxis((0.0, if height > width {
+                            height as f64
+                        } else {
+                            height as f64 * 2.0 / disp_height
+                        })),
             };
             let vlims = self.vlims.unwrap_or_else(|| {
                 let (&vmin, &vmax) = self.data.min_max().unwrap_or((&0.0, &1.0));
@@ -131,6 +141,19 @@ impl ImageView {
         }
         raw
     }
+
+    /// Displayed size within container
+    fn size(&self) -> (f64, f64) {
+        compute_size_within_container(self.data.shape())
+    }
+}
+
+fn compute_size_within_container((width, height): (usize, usize)) -> (f64, f64) {
+    if width > height {
+        (2.0, 2.0 * height as f64 / width as f64)
+    } else {
+        (2.0 * width as f64 / height as f64, 2.0)
+    }
 }
 
 impl Artist for ImageView {
@@ -155,7 +178,7 @@ impl Artist for ImageView {
                 interpolation: self.i.interpolation,
                 data: self.raw_rgb(),
                 position: (-1.0, 1.0), // bottom-left corner
-                size: (2.0, 2.0),      // Fill complete axes
+                size: self.size(),
             },
         ]
     }
