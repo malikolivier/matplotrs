@@ -1,7 +1,7 @@
 use matplotrs_backend;
 use artist::Artist;
 use axis::Axis;
-use color::{Color, BLACK, WHITE};
+use color::{BLACK, WHITE};
 use color_lut::ColorLUT;
 use extend_vec::HasMinMax;
 
