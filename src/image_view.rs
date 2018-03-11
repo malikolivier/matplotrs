@@ -68,15 +68,13 @@ impl ImageViewBuilder {
 
 impl Default for ImageViewAttributes {
     fn default() -> Self {
-        Self {
-            interpolation: matplotrs_backend::Interpolation::None,
-        }
+        Self { interpolation: matplotrs_backend::Interpolation::None }
     }
 }
 
 impl ImageView {
     fn raw_rgb(&self) -> Vec<u8> {
-        Vec::new()
+        vec![160u8; 3 * 10_000]
     }
 }
 
@@ -100,9 +98,9 @@ impl Artist for ImageView {
                 height: self.shape.1,
                 interpolation: self.i.interpolation,
                 data: self.raw_rgb(),
-                position: (-1.0, -1.0), // bottom-left corner
+                position: (-1.0, 1.0), // bottom-left corner
                 size: (2.0, 2.0), // Fill complete axes
-            }
+            },
         ]
     }
 }

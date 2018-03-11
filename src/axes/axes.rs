@@ -46,7 +46,7 @@ impl Artist for Axes {
                 be.draw_text(&text)?;
             }
             for image in artist.images() {
-                //let text = self.transform_text(text);
+                let image = self.transform_image(image);
                 be.draw_image(&image)?;
             }
             artist.render_children(be)?;
@@ -114,5 +114,15 @@ impl Axes {
         let (px, py) = text.point;
         text.point = (x + dx / 2.0 * (1.0 + px), y + dy / 2.0 * (1.0 + py));
         text
+    }
+
+    /// Transform child's image position and sizing to parent's coordinate system
+    fn transform_image(&self, mut image: matplotrs_backend::Image) -> matplotrs_backend::Image {
+        let [x, y, dx, dy] = self.a.rect;
+        let (px, py) = image.position;
+        image.position = (x + dx / 2.0 * (1.0 + px), y + dy / 2.0 * (1.0 + py));
+        let (size_x, size_y) = image.size;
+        image.size = (size_x * dx / 2.0, size_y * dy / 2.0);
+        image
     }
 }
