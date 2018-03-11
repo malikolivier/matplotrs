@@ -11,3 +11,6 @@ matplotrs_printpdf_backend = { path = "./printpdf_backend", optional = true }
 [features]
 amethyst = ["matplotrs_amethyst_backend"]
 printpdf = ["matplotrs_printpdf_backend"]
+
+[dev-dependencies]
+rustfmt-nightly = "0.3.6"
