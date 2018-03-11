@@ -60,16 +60,16 @@ where
         let mut min = None;
         let mut max = None;
         for single_series in self {
-            single_series.min_with(f).map(|min_candidate|
+            single_series.min_with(f).map(|min_candidate| {
                 if min.is_none() || (min.is_some() && min_candidate < min.unwrap()) {
                     min = Some(min_candidate);
                 }
-            );
-            single_series.max_with(f).map(|max_candidate|
+            });
+            single_series.max_with(f).map(|max_candidate| {
                 if max.is_none() || (max.is_some() && max_candidate > max.unwrap()) {
                     max = Some(max_candidate);
                 }
-            );
+            });
         }
         match (min, max) {
             (Some(min), Some(max)) => Some((min, max)),

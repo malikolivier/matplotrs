@@ -8,7 +8,6 @@ use matplotrs::line::Line;
 use matplotrs::line_collection::LineCollectionBuilder;
 use matplotrs::plot::PlotBuilder;
 
-
 fn main() {
     let mut app = App::new();
     let mut fig = Figure::new();

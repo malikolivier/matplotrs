@@ -46,11 +46,9 @@ impl PlotBuilder {
         };
         let all_series = self.data
             .into_iter()
-            .map(|one_series| {
-                PlotSeries {
-                    data: one_series,
-                    edgecolor: BLACK,
-                }
+            .map(|one_series| PlotSeries {
+                data: one_series,
+                edgecolor: BLACK,
             })
             .collect();
         Plot {

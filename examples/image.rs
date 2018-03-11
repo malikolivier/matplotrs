@@ -6,7 +6,6 @@ use matplotrs::axes::AxesBuilder;
 use matplotrs::color::BROWN;
 use matplotrs::image_view::ImageViewBuilder;
 
-
 fn main() {
     let mut app = App::new();
     let mut fig = Figure::new();

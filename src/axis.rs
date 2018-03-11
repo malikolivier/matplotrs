@@ -32,20 +32,14 @@ impl Axis {
     }
 
     pub fn new_xaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
-        let (&(x_min, _), &(x_max, _)) =
-            data.min_max(&extend_vec::tuple_partial_cmp_x).unwrap_or((
-                &(0.0, 0.0),
-                &(0.0, 0.0),
-            ));
+        let (&(x_min, _), &(x_max, _)) = data.min_max(&extend_vec::tuple_partial_cmp_x)
+            .unwrap_or((&(0.0, 0.0), &(0.0, 0.0)));
         Self::new_xaxis((x_min, x_max))
     }
 
     pub fn new_yaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
-        let (&(_, y_min), &(_, y_max)) =
-            data.min_max(&extend_vec::tuple_partial_cmp_y).unwrap_or((
-                &(0.0, 0.0),
-                &(0.0, 0.0),
-            ));
+        let (&(_, y_min), &(_, y_max)) = data.min_max(&extend_vec::tuple_partial_cmp_y)
+            .unwrap_or((&(0.0, 0.0), &(0.0, 0.0)));
         Self::new_yaxis((y_min, y_max))
     }
 

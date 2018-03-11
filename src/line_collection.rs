@@ -18,7 +18,9 @@ pub struct LineCollectionAttributes {
 
 impl LineCollection {
     pub fn new() -> Self {
-        Self { l: Default::default() }
+        Self {
+            l: Default::default(),
+        }
     }
 
     pub fn add_vertex(&mut self, vertex: (f64, f64)) {
@@ -35,7 +37,9 @@ impl LineCollection {
 
 impl LineCollectionBuilder {
     pub fn new() -> Self {
-        Self { l: Default::default() }
+        Self {
+            l: Default::default(),
+        }
     }
 
     pub fn with_edgecolor<T: Into<Color>>(mut self, color: T) -> Self {
@@ -55,7 +59,6 @@ impl LineCollectionBuilder {
         LineCollection { l: self.l }
     }
 }
-
 
 impl Default for LineCollectionAttributes {
     fn default() -> Self {

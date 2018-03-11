@@ -15,7 +15,6 @@
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct Color(pub f64, pub f64, pub f64, pub f64);
 
-
 impl Color {
     /// Create RGB colors with an alpha component for transparency.
     /// The alpha component is specified with numbers between 0 and 1.
@@ -90,13 +89,17 @@ fn f64_to_byte(x: f64) -> u8 {
 /// version.
 
 macro_rules! make_color {
-    ($r:expr, $g:expr, $b:expr) => ( Color($r as f64 / 255.0,
-                                           $g as f64 / 255.0,
-                                           $b as f64 / 255.0, 1.0));
-    ($r:expr, $g:expr, $b:expr, $a:expr) => ( Color($r as f64 / 255.0,
-                                                    $g as f64 / 255.0,
-                                                    $b as f64 / 255.0,
-                                                    $a as f64 / 255.0));
+    ($r: expr, $g: expr, $b: expr) => {
+        Color($r as f64 / 255.0, $g as f64 / 255.0, $b as f64 / 255.0, 1.0)
+    };
+    ($r: expr, $g: expr, $b: expr, $a: expr) => {
+        Color(
+            $r as f64 / 255.0,
+            $g as f64 / 255.0,
+            $b as f64 / 255.0,
+            $a as f64 / 255.0,
+        )
+    };
 }
 
 /// Scarlet Red - Light - #EF2929

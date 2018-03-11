@@ -1,7 +1,7 @@
 use matplotrs_backend;
 use artist::Artist;
 use axis::Axis;
-use color::{WHITE, BLACK, Color};
+use color::{Color, BLACK, WHITE};
 use color_lut::ColorLUT;
 
 pub struct ImageView {
@@ -123,7 +123,7 @@ impl Artist for ImageView {
                 interpolation: self.i.interpolation,
                 data: self.raw_rgb(),
                 position: (-1.0, 1.0), // bottom-left corner
-                size: (2.0, 2.0), // Fill complete axes
+                size: (2.0, 2.0),      // Fill complete axes
             },
         ]
     }

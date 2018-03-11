@@ -57,7 +57,9 @@ impl Artist for Axes {
 
 impl AxesBuilder {
     pub fn new() -> AxesBuilder {
-        AxesBuilder { a: Default::default() }
+        AxesBuilder {
+            a: Default::default(),
+        }
     }
 
     pub fn build(self) -> Axes {

@@ -3,7 +3,7 @@ extern crate matplotrs;
 use matplotrs::app::App;
 use matplotrs::figure::FigureBuilder;
 use matplotrs::axes::AxesBuilder;
-use matplotrs::color::{RED, GREEN, BLACK};
+use matplotrs::color::{BLACK, GREEN, RED};
 
 fn main() {
     let mut app = App::new();

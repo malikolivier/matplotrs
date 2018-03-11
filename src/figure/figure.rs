@@ -76,7 +76,6 @@ impl Default for FigureAttributes {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::FigureBuilder;
