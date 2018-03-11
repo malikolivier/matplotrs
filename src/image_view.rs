@@ -43,8 +43,28 @@ impl ImageViewBuilder {
         }
     }
 
-    pub fn new_from_linear_data(image: Vec<f64>, shape: (usize, usize)) -> Result<Self, String> {
-        unimplemented!()
+    // Assumes data is row-major
+    pub fn new_from_linear_data<T>(data: Vec<T>, shape: (usize, usize)) -> Result<Self, String>
+    where
+        T: Into<f64>,
+    {
+        let len = data.len();
+        let (col_count, row_count) = shape;
+        if len != col_count * row_count {
+            Err("Data length and shape do not match!".to_owned())
+        } else {
+            let mut image = Vec::with_capacity(row_count);
+            let mut row_vec = Vec::with_capacity(col_count);
+            for (i, val) in data.into_iter().enumerate() {
+                if i != 0 && (i % col_count) == 0 {
+                    image.push(row_vec);
+                    row_vec = Vec::with_capacity(col_count);
+                }
+                row_vec.push(val.into());
+            }
+            image.push(row_vec);
+            Ok(Self::new(image))
+        }
     }
 
     pub fn build(self) -> Result<ImageView, String> {
