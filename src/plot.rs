@@ -7,6 +7,7 @@ pub struct Plot {
     data: Vec<PlotSeries>,
     xaxis: Axis,
     yaxis: Axis,
+    #[allow(dead_code)] // TODO p is not used yet, but shall be used in the future!
     p: PlotAttributes,
 }
 
