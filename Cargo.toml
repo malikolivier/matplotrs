@@ -14,3 +14,5 @@ printpdf = ["matplotrs_printpdf_backend"]
 
 [dev-dependencies]
 rustfmt-nightly = "0.3.6"
+# Used for some examples
+fits = { path = "../fits" }
