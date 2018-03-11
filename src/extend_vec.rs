@@ -40,32 +40,38 @@ pub fn tuple_partial_cmp_y(&(_x1, y1): &(f64, f64), &(_x2, y2): &(f64, f64)) -> 
     y1.partial_cmp(&y2).unwrap_or(Ordering::Less)
 }
 
-pub trait MinMax2DVec<T>
+pub trait HasMinMax<T>
 where
     T: PartialOrd,
 {
-    fn min_max<F>(&self, f: &F) -> Option<(&T, &T)>
+    fn min_max_with<F>(&self, f: F) -> Option<(&T, &T)>
     where
         F: Fn(&T, &T) -> Ordering;
+
+    fn min_max(&self) -> Option<(&T, &T)> {
+        self.min_max_with(|v1: &T, v2: &T| {
+            v1.partial_cmp(&v2).unwrap_or(Ordering::Less)
+        })
+    }
 }
 
-impl<T> MinMax2DVec<T> for Vec<Vec<T>>
+impl<T> HasMinMax<T> for Vec<Vec<T>>
 where
     T: PartialOrd,
 {
-    fn min_max<F>(&self, f: &F) -> Option<(&T, &T)>
+    fn min_max_with<F>(&self, f: F) -> Option<(&T, &T)>
     where
         F: Fn(&T, &T) -> Ordering,
     {
         let mut min = None;
         let mut max = None;
         for single_series in self {
-            single_series.min_with(f).map(|min_candidate| {
+            single_series.min_with(&f).map(|min_candidate| {
                 if min.is_none() || (min.is_some() && min_candidate < min.unwrap()) {
                     min = Some(min_candidate);
                 }
             });
-            single_series.max_with(f).map(|max_candidate| {
+            single_series.max_with(&f).map(|max_candidate| {
                 if max.is_none() || (max.is_some() && max_candidate > max.unwrap()) {
                     max = Some(max_candidate);
                 }

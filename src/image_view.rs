@@ -3,6 +3,7 @@ use artist::Artist;
 use axis::Axis;
 use color::{Color, BLACK, WHITE};
 use color_lut::ColorLUT;
+use extend_vec::HasMinMax;
 
 pub struct ImageView {
     data: Vec<Vec<f64>>,
@@ -51,11 +52,15 @@ impl ImageViewBuilder {
                 Some(ylims) => Axis::new_yaxis(ylims),
                 None => Axis::new_yaxis((0.0, self.data[0].len() as f64)),
             };
+            let vlims = self.vlims.unwrap_or_else(|| {
+                let (&vmin, &vmax) = self.data.min_max().unwrap_or((&0.0, &1.0));
+                (vmin, vmax)
+            });
             Ok(ImageView {
                 data: self.data,
                 xaxis,
                 yaxis,
-                vlims: self.vlims.unwrap_or((0.0, 1.0)),
+                vlims,
                 shape: self.shape,
                 i: self.i,
             })
@@ -93,7 +98,12 @@ impl ImageView {
         let (vmin, vmax) = self.vlims;
         for line in self.data.iter() {
             for val in line.iter() {
-                let normalized_val = (*val - vmin) / (vmax - vmin);
+                let mut normalized_val = (*val - vmin) / (vmax - vmin);
+                if normalized_val < 0.0 {
+                    normalized_val = 0.0;
+                } else if normalized_val > 1.0 {
+                    normalized_val = 1.0;
+                }
                 let bytes = self.i.lut.color_at(normalized_val).bytes_rgb();
                 raw.extend(&bytes);
             }
