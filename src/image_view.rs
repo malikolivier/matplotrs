@@ -29,15 +29,22 @@ pub struct ImageViewAttributes {
 }
 
 impl ImageViewBuilder {
-    pub fn new(image: Vec<Vec<f64>>, shape: (usize, usize)) -> Self {
+    /// Create a new image view and deduce uts shape from input vector
+    pub fn new(image: Vec<Vec<f64>>) -> Self {
+        let row_count = image.len();
+        let col_count = if row_count == 0 { 0 } else { image[0].len() };
         Self {
             data: image,
             xlims: None,
             ylims: None,
             vlims: None,
-            shape: shape,
+            shape: (row_count, col_count),
             i: Default::default(),
         }
+    }
+
+    pub fn new_from_linear_data(image: Vec<f64>, shape: (usize, usize)) -> Result<Self, String> {
+        unimplemented!()
     }
 
     pub fn build(self) -> Result<ImageView, String> {
