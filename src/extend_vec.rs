@@ -81,3 +81,26 @@ where
         }
     }
 }
+
+pub trait HasShape<T> {
+    fn shape(&self) -> T;
+}
+
+pub trait HasTotalLength<T>: HasShape<T> {
+    fn total_length(&self) -> usize;
+}
+
+impl<U> HasShape<(usize, usize)> for Vec<Vec<U>> {
+    fn shape(&self) -> (usize, usize) {
+        let row_count = self.len();
+        let col_count = if row_count == 0 { 0 } else { self[0].len() };
+        (col_count, row_count)
+    }
+}
+
+impl<U> HasTotalLength<(usize, usize)> for Vec<Vec<U>> {
+    fn total_length(&self) -> usize {
+        let shape = self.shape();
+        shape.0 * shape.1
+    }
+}
