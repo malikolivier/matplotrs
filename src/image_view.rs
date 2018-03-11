@@ -8,6 +8,7 @@ pub struct ImageView {
     data: Vec<Vec<f64>>,
     xaxis: Axis,
     yaxis: Axis,
+    vlims: (f64, f64),
     shape: (usize, usize),
     i: ImageViewAttributes,
 }
@@ -16,6 +17,7 @@ pub struct ImageViewBuilder {
     data: Vec<Vec<f64>>,
     xlims: Option<(f64, f64)>,
     ylims: Option<(f64, f64)>,
+    vlims: Option<(f64, f64)>,
     shape: (usize, usize),
     i: ImageViewAttributes,
 }
@@ -31,6 +33,7 @@ impl ImageViewBuilder {
             data: image,
             xlims: None,
             ylims: None,
+            vlims: None,
             shape: shape,
             i: Default::default(),
         }
@@ -52,6 +55,7 @@ impl ImageViewBuilder {
                 data: self.data,
                 xaxis,
                 yaxis,
+                vlims: self.vlims.unwrap_or((0.0, 1.0)),
                 shape: self.shape,
                 i: self.i,
             })
@@ -65,6 +69,11 @@ impl ImageViewBuilder {
 
     pub fn with_ylims(mut self, ylims: (f64, f64)) -> Self {
         self.ylims = Some(ylims);
+        self
+    }
+
+    pub fn with_vlims(mut self, vlims: (f64, f64)) -> Self {
+        self.vlims = Some(vlims);
         self
     }
 }
@@ -81,9 +90,11 @@ impl Default for ImageViewAttributes {
 impl ImageView {
     fn raw_rgb(&self) -> Vec<u8> {
         let mut raw = Vec::with_capacity(3 * self.data.len());
+        let (vmin, vmax) = self.vlims;
         for line in self.data.iter() {
-            for point in line.iter() {
-                let bytes = self.i.lut.color_at(*point).bytes_rgb();
+            for val in line.iter() {
+                let normalized_val = (*val - vmin) / (vmax - vmin);
+                let bytes = self.i.lut.color_at(normalized_val).bytes_rgb();
                 raw.extend(&bytes);
             }
         }
