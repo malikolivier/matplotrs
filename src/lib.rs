@@ -12,6 +12,7 @@ pub mod plot;
 mod axis;
 pub mod image_view;
 pub mod color_lut;
+mod extend_vec;
 
 pub extern crate matplotrs_backend;
 
