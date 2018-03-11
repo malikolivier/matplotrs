@@ -67,22 +67,28 @@ impl ImageViewBuilder {
             Err("The provided array is empty!".to_owned())
         } else {
             let (width, height) = self.data.shape();
-            let (disp_width, disp_height) = compute_size_within_container((width, height));
+            let (disp_width, disp_height) = fit_size_within_container((width, height));
             let xaxis = match self.xlims {
                 Some(xlims) => Axis::new_xaxis(xlims),
-                None => Axis::new_xaxis((0.0, if width > height {
-                            width as f64
-                        } else {
-                            width as f64 * 2.0 / disp_width
-                        }))
+                None => Axis::new_xaxis((
+                    0.0,
+                    if width > height {
+                        width as f64
+                    } else {
+                        width as f64 * 2.0 / disp_width
+                    },
+                )),
             };
             let yaxis = match self.ylims {
                 Some(ylims) => Axis::new_yaxis(ylims),
-                None => Axis::new_yaxis((0.0, if height > width {
-                            height as f64
-                        } else {
-                            height as f64 * 2.0 / disp_height
-                        })),
+                None => Axis::new_yaxis((
+                    0.0,
+                    if height > width {
+                        height as f64
+                    } else {
+                        height as f64 * 2.0 / disp_height
+                    },
+                )),
             };
             let vlims = self.vlims.unwrap_or_else(|| {
                 let (&vmin, &vmax) = self.data.min_max().unwrap_or((&0.0, &1.0));
@@ -142,13 +148,30 @@ impl ImageView {
         raw
     }
 
-    /// Displayed size within container
-    fn size(&self) -> (f64, f64) {
-        compute_size_within_container(self.data.shape())
+    /// Displayed size within container in container's coordinates
+    fn world_size(&self) -> (f64, f64) {
+        let (width, height) = self.data.shape();
+        let (lower_left_pos_x, lower_left_pos_y) = self.world_position();
+        let upper_right_pos_x = self.xaxis.world_coord_at(width as f64);
+        let upper_right_pos_y = self.yaxis.world_coord_at(height as f64);
+        // X axis in increasing in the up direction, while Y axis in decreasing in the right
+        // direction. So to get the size,
+        // we must take (- upper_right_pos_y + lower_left_pos_y), which is positive
+        (
+            upper_right_pos_x - lower_left_pos_x,
+            -upper_right_pos_y + lower_left_pos_y,
+        )
+    }
+
+    /// Displayed position (bottom-left corner) within container in container's coordinates
+    fn world_position(&self) -> (f64, f64) {
+        (self.xaxis.world_coord_at(0), self.yaxis.world_coord_at(0))
     }
 }
 
-fn compute_size_within_container((width, height): (usize, usize)) -> (f64, f64) {
+/// Compute the displayed size so that a image of size (width x height) fits perfectly inside a
+/// squared container (whose coordinates go from -1.0 to 1.0)
+fn fit_size_within_container((width, height): (usize, usize)) -> (f64, f64) {
     if width > height {
         (2.0, 2.0 * height as f64 / width as f64)
     } else {
@@ -177,8 +200,8 @@ impl Artist for ImageView {
                 height,
                 interpolation: self.i.interpolation,
                 data: self.raw_rgb(),
-                position: (-1.0, 1.0), // bottom-left corner
-                size: self.size(),
+                position: self.world_position(),
+                size: self.world_size(),
             },
         ]
     }

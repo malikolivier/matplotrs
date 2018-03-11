@@ -32,15 +32,27 @@ impl Axis {
     }
 
     pub fn new_xaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
-        let (&(x_min, _), &(x_max, _)) = data.min_max_with(&extend_vec::tuple_partial_cmp_x)
+        let (&(x_min, _), &(x_max, _)) = data.min_max_with(extend_vec::tuple_partial_cmp_x)
             .unwrap_or((&(0.0, 0.0), &(0.0, 0.0)));
         Self::new_xaxis((x_min, x_max))
     }
 
     pub fn new_yaxis_auto(data: &Vec<Vec<(f64, f64)>>) -> Self {
-        let (&(_, y_min), &(_, y_max)) = data.min_max_with(&extend_vec::tuple_partial_cmp_y)
+        let (&(_, y_min), &(_, y_max)) = data.min_max_with(extend_vec::tuple_partial_cmp_y)
             .unwrap_or((&(0.0, 0.0), &(0.0, 0.0)));
         Self::new_yaxis((y_min, y_max))
+    }
+
+    /// Get relative coordinate of point in the contained axes (-1 to +1)
+    pub fn world_coord_at<T>(&self, point: T) -> f64
+    where
+        T: Into<f64>,
+    {
+        let (min, max) = self.lims;
+        match self.axis_type {
+            XAxis => -1.0 + 2.0 * (point.into() - min) / (max - min),
+            YAxis => 1.0 - 2.0 * (point.into() - min) / (max - min),
+        }
     }
 
     /// Run a function over tick positions in the coordinates of the contained axes
