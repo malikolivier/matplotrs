@@ -69,6 +69,9 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err> {
+        if self.figures.len() > 0 {
+            return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()))
+        }
         let &(x, y) = size;
         let window = WindowSettings::new(
                 title,
@@ -100,8 +103,8 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     fn show(mut self) -> Result<i32, Self::Err> {
-        let mut events = Events::new(EventSettings::new());
         for figure in self.figures.iter_mut() {
+            let mut events = Events::new(EventSettings::new());
             while let Some(e) = events.next(&mut figure.w) {
                 if let Some(r) = e.render_args() {
                     figure.render(&r);
@@ -112,6 +115,7 @@ impl matplotrs_backend::Backend for PistonBackend {
                 }
             }
         }
+        println!("Bye!");
         Ok(0)
     }
 }
