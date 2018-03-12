@@ -25,6 +25,10 @@ pub enum PdfError {
 const DEFAULT_FONT: BuiltinFont = BuiltinFont::TimesRoman;
 const DEFAULT_DPI: f64 = 300.0;
 
+/// Dummy figure ID. Indeed PDF does not have concept of `figure`,
+/// so always us this dummy as place holder
+const DUMMY_FIG_ID: matplotrs_backend::FigureId = matplotrs_backend::FigureId(0);
+
 impl matplotrs_backend::Backend for PrintPdfBackend {
     type Err = PdfError;
     fn new() -> Self {
@@ -33,7 +37,13 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             layer: None,
             size: None,
             default_font: None,
-            events: vec![matplotrs_backend::Event::SaveToFile, matplotrs_backend::Event::Render],
+            events: vec![matplotrs_backend::Event {
+                fig_id: DUMMY_FIG_ID,
+                e: matplotrs_backend::EventKind::SaveToFile,
+            }, matplotrs_backend::Event {
+                fig_id: DUMMY_FIG_ID,
+                e: matplotrs_backend::EventKind::Render,
+            }],
         }
     }
 
@@ -53,7 +63,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             }
         }
         self.size = Some((Mm(size.0), Mm(size.1)));
-        Ok(matplotrs_backend::FigureId(0))
+        Ok(DUMMY_FIG_ID)
     }
 
     fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {

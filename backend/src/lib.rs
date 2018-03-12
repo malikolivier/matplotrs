@@ -37,7 +37,7 @@ pub struct Image {
     pub size: (f64, f64),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct FigureId(pub usize);
 
 #[derive(Copy, Clone)]
@@ -48,7 +48,13 @@ pub enum Interpolation {
 }
 
 #[derive(Debug)]
-pub enum Event {
+pub struct Event {
+    pub fig_id: FigureId,
+    pub e: EventKind
+}
+
+#[derive(Debug)]
+pub enum EventKind {
     Render,
     /// Update arguments, containing delta time in seconds
     Update(f64),
