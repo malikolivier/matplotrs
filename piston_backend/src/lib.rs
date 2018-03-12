@@ -24,7 +24,10 @@ pub struct PistonBackend {
 struct Figure {
     w: Window,
     id: matplotrs_backend::FigureId,
-    gl: GlGraphics, // OpenGL drawing backend
+    /// OpenGL drawing backend
+    gl: GlGraphics,
+    /// Figure size cached in pixel (w, h)
+    cached_size: (f64, f64),
 }
 
 #[derive(Debug)]
@@ -67,6 +70,7 @@ impl matplotrs_backend::Backend for PistonBackend {
             w: window,
             id,
             gl: GlGraphics::new(OPENGL_VERSION),
+            cached_size: figure.size,
         });
         self.figure_id_count += 1;
         Ok(id)
@@ -77,6 +81,7 @@ impl matplotrs_backend::Backend for PistonBackend {
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
         let gl = &mut fig.gl;
         let color = to_webgl_color(figure.facecolor);
+        fig.cached_size = figure.size;
         gl.draw(to_webgl_viewport((1.0, 1.0)), |_, gl| {
             use graphics::clear;
             clear(color, gl);
@@ -88,8 +93,7 @@ impl matplotrs_backend::Backend for PistonBackend {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
         let gl = &mut fig.gl;
-        // TODO: Get real values here!
-        let (fig_width, fig_height) = (1000.0, 1000.0);
+        let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_webgl_viewport((fig_width, fig_height));
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         gl.draw(view_port, |c, gl| {
