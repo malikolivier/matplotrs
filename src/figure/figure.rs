@@ -1,5 +1,5 @@
 use backend::Backend;
-use matplotrs_backend::Backend as BackendTrait;
+use matplotrs_backend::{Backend as BackendTrait, FigureId};
 use color::Color;
 use artist::Artist;
 
@@ -66,11 +66,10 @@ impl Figure {
         self.f.title.as_ref().map(String::as_str)
     }
 
-    pub fn create(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+    pub fn create(&self, be: &mut Backend) -> Result<FigureId, <Backend as BackendTrait>::Err> {
         let title = self.title().unwrap_or("Figure");
         let size = &self.f.figsize;
-        be.new_figure(title, size)?;
-        Ok(())
+        Ok(be.new_figure(title, size)?)
     }
 
     pub fn render(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {

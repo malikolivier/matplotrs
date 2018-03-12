@@ -16,10 +16,12 @@ pub struct PistonBackend {
     events: Events,
     figure_idx: usize,
     event_stack: Vec<matplotrs_backend::Event>,
+    figure_id_count: usize,
 }
 
 struct Figure {
     w: Window,
+    id: matplotrs_backend::FigureId,
     gl: GlGraphics, // OpenGL drawing backend.
     rotation: f64,  // Rotation for the square.
 }
@@ -71,10 +73,11 @@ impl matplotrs_backend::Backend for PistonBackend {
             events: Events::new(EventSettings::new()),
             figure_idx: 0,
             event_stack: vec![matplotrs_backend::Event::Render],
+            figure_id_count: 0,
         }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err> {
+    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<matplotrs_backend::FigureId, Self::Err> {
         if self.figures.len() > 0 {
             return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()))
         }
@@ -88,12 +91,15 @@ impl matplotrs_backend::Backend for PistonBackend {
             .srgb(false)
             .exit_on_esc(true)
             .build()?;
+        let id = matplotrs_backend::FigureId(self.figure_id_count);
         self.figures.push(Figure {
             w: window,
+            id,
             gl: GlGraphics::new(OPENGL_VERSION),
             rotation: 0.0,
         });
-        Ok(())
+        self.figure_id_count += 1;
+        Ok(id)
     }
 
     fn draw_path(&mut self, _: &matplotrs_backend::Path) -> Result<(), Self::Err> {

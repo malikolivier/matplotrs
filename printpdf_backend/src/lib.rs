@@ -37,7 +37,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err> {
+    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<matplotrs_backend::FigureId, Self::Err> {
         match self.doc {
             None => {
                 let (doc, page1, layer1) = PdfDocument::new(title, Mm(size.0), Mm(size.1), "Layer 1");
@@ -53,7 +53,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             }
         }
         self.size = Some((Mm(size.0), Mm(size.1)));
-        Ok(())
+        Ok(matplotrs_backend::FigureId(0))
     }
 
     fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {

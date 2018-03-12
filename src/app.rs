@@ -1,6 +1,6 @@
 use backend::Backend;
 use matplotrs_backend::Backend as BackendTrait;
-use matplotrs_backend::Event;
+use matplotrs_backend::{Event, FigureId};
 
 use figure::Figure;
 
@@ -10,7 +10,7 @@ pub struct App {
 
 struct FigureContainer {
     fig: Figure,
-    created: bool,
+    id: Option<FigureId>,
 }
 
 impl App {
@@ -19,10 +19,7 @@ impl App {
     }
 
     pub fn add_figure(&mut self, fig: Figure) {
-        self.figs.push(FigureContainer {
-            fig,
-            created: false,
-        });
+        self.figs.push(FigureContainer { fig, id: None });
     }
 
     pub fn start(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
@@ -40,9 +37,8 @@ impl App {
     fn render(&mut self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
         for fig_container in self.figs.iter_mut() {
             let fig = &fig_container.fig;
-            if !fig_container.created {
-                fig.create(be)?;
-                fig_container.created = true;
+            if fig_container.id.is_none() {
+                fig_container.id = Some(fig.create(be)?);
             }
             fig.render(be)?;
         }

@@ -1,7 +1,8 @@
 pub trait Backend {
     type Err;
     fn new() -> Self;
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<(), Self::Err>;
+    /// Return figure ID in back-end
+    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<FigureId, Self::Err>;
     fn draw_path(&mut self, path: &Path) -> Result<(), Self::Err>;
     fn draw_text(&mut self, text: &Text) -> Result<(), Self::Err>;
     fn draw_image(&mut self, image: &Image) -> Result<(), Self::Err>;
@@ -35,6 +36,9 @@ pub struct Image {
     /// container's coordinates
     pub size: (f64, f64),
 }
+
+#[derive(Copy, Clone)]
+pub struct FigureId(pub usize);
 
 #[derive(Copy, Clone)]
 pub enum Interpolation {

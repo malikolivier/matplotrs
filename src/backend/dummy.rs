@@ -9,8 +9,12 @@ impl matplotrs_backend::Backend for DummyBackend {
         DummyBackend
     }
 
-    fn new_figure(&mut self, _title: &str, _size: &(f64, f64)) -> Result<(), Self::Err> {
-        Ok(())
+    fn new_figure(
+        &mut self,
+        _title: &str,
+        _size: &(f64, f64),
+    ) -> Result<matplotrs_backend::FigureId, Self::Err> {
+        Ok(matplotrs_backend::FigureId(0))
     }
 
     fn draw_path(&mut self, _: &matplotrs_backend::Path) -> Result<(), Self::Err> {
@@ -31,9 +35,5 @@ impl matplotrs_backend::Backend for DummyBackend {
 
     fn save_to_file(&mut self) -> Result<(), Self::Err> {
         Ok(())
-    }
-
-    fn show(self) -> Result<i32, Self::Err> {
-        Ok(0)
     }
 }
