@@ -131,7 +131,6 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                 Ok(0)
             }
         }
-
     }
 }
 
