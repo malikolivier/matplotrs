@@ -139,10 +139,6 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             }
         }
     }
-
-    fn show(self)-> Result<i32, Self::Err> {
-        panic!("PrintPdf back-end does not support show()!")
-    }
 }
 
 impl PrintPdfBackend {

@@ -15,6 +15,7 @@ pub struct PistonBackend {
     figures: Vec<Figure>,
     events: Events,
     figure_idx: usize,
+    event_stack: Vec<matplotrs_backend::Event>,
 }
 
 struct Figure {
@@ -69,6 +70,7 @@ impl matplotrs_backend::Backend for PistonBackend {
             figures: Vec::new(),
             events: Events::new(EventSettings::new()),
             figure_idx: 0,
+            event_stack: vec![matplotrs_backend::Event::Render],
         }
     }
 
@@ -111,41 +113,28 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     fn next_event(&mut self) -> Option<matplotrs_backend::Event> {
-        let len = self.figures.len();
-        if len == 0 {
-            // No figure, so nothing to do
-            None
-        } else {
-            if self.figure_idx >= len {
-                self.figure_idx = 0;
-            }
-            let next_figure = &mut self.figures[self.figure_idx];
-            let next_event = self.events.next(&mut next_figure.w);
-            let mut ret_event = None;
-            if let Some(e) = next_event {
-                ret_event = Some(convert_events(e));
-            }
-            self.figure_idx += 1;
-            ret_event
-        }
-    }
-
-    fn show(mut self) -> Result<i32, Self::Err> {
-        // TODO Update this loop to support multiple figures
-        for figure in self.figures.iter_mut() {
-            let mut events = Events::new(EventSettings::new());
-            while let Some(e) = events.next(&mut figure.w) {
-                if let Some(r) = e.render_args() {
-                    figure.render(&r);
+        self.event_stack.pop().or_else(|| {
+            let len = self.figures.len();
+            if len == 0 {
+                // No figure, so nothing to do
+                println!("No more event to process in Piston backend!");
+                None
+            } else {
+                if self.figure_idx >= len {
+                    self.figure_idx = 0;
                 }
-
-                if let Some(u) = e.update_args() {
-                    figure.update(&u);
+                let event = {
+                    let next_figure = &mut self.figures[self.figure_idx];
+                    self.figure_idx += 1;
+                    self.events.next(&mut next_figure.w).and_then(convert_events)
+                };
+                if event.is_none() {
+                    self.next_event()
+                } else {
+                    event
                 }
             }
-        }
-        println!("Bye!");
-        Ok(0)
+        })
     }
 }
 
@@ -155,15 +144,22 @@ impl From<String> for PistonError {
     }
 }
 
-fn convert_events(event: Event) -> matplotrs_backend::Event {
+fn convert_events(event: Event) -> Option<matplotrs_backend::Event> {
     match event {
         Event::Input(input) => match input {
+            Input::Resize(_w, _h) => None,
+            Input::Focus(_focus) => None,
+            Input::Move(_motion) => None, /* TODO Ignore for now! */
+            Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
+            Input::Button(_args) => None, /* TODO Ignore for now! */
+            Input::Close(_) => None, /* TODO Ignore for now! */
             _ => unimplemented!(),
         },
         Event::Loop(lp) => match lp {
-            Loop::Render(_args) => matplotrs_backend::Event::Render,
-            Loop::Update(args) => matplotrs_backend::Event::Update(args.dt),
-            _ => unimplemented!(),
+            Loop::Render(_args) => Some(matplotrs_backend::Event::Render),
+            Loop::AfterRender(_args) => None,
+            Loop::Update(args) => Some(matplotrs_backend::Event::Update(args.dt)),
+            Loop::Idle(_args) => None,
         }
         _ => unimplemented!(),
     }

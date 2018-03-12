@@ -8,7 +8,6 @@ pub trait Backend {
     /// Iterate over each event in the backend
     fn next_event(&mut self) -> Option<Event>;
     fn save_to_file(&mut self)-> Result<(), Self::Err>;
-    fn show(self) -> Result<i32, Self::Err>;
 }
 
 pub struct Path {
@@ -44,6 +43,7 @@ pub enum Interpolation {
     Quadratic,
 }
 
+#[derive(Debug)]
 pub enum Event {
     Render,
     /// Update arguments, containing delta time in seconds
