@@ -65,7 +65,7 @@ impl App {
         let mut maybe_fig = self.figure_by_id(id);
         match maybe_fig {
             Some(ref mut fig) => Ok(f(fig)),
-            None => Err("Could not find figure with given ID...".to_owned()),
+            None => Err(FIGURE_NOT_FOUND_ERR.to_owned()),
         }
     }
 
@@ -76,7 +76,9 @@ impl App {
         let mut maybe_fig = self.figure_by_id(id);
         match maybe_fig {
             Some(ref mut fig) => Ok(f(fig)?),
-            None => Err(From::from("Could not find figure with given ID...")),
+            None => Err(From::from(FIGURE_NOT_FOUND_ERR)),
         }
     }
 }
+
+const FIGURE_NOT_FOUND_ERR: &str = "Could not find figure with given ID...";
