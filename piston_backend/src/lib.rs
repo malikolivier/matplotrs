@@ -169,3 +169,14 @@ fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
         _ => unimplemented!(),
     }
 }
+
+impl PistonBackend {
+    fn figure_by_id(&self, fig_id: matplotrs_backend::FigureId) -> Option<&Figure> {
+        for fig in self.figures.iter() {
+            if fig.id == fig_id {
+                return Some(fig);
+            }
+        }
+        None
+    }
+}
