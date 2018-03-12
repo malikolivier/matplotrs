@@ -1,5 +1,6 @@
 use backend::Backend;
 use matplotrs_backend::Backend as BackendTrait;
+use matplotrs_backend::Event;
 
 use figure::Figure;
 
@@ -26,8 +27,13 @@ impl App {
 
     pub fn start(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
         let mut be = Backend::new();
-        self.render(&mut be)?;
-        be.show()
+        while let Some(event) = be.next_event() {
+            match event {
+                Event::Render => self.render(&mut be)?,
+                Event::SaveToFile => be.save_to_file()?,
+            };
+        }
+        Ok(0)
     }
 
     fn render(&mut self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {

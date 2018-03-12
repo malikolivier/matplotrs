@@ -12,6 +12,7 @@ pub struct PrintPdfBackend {
     layer: Option<PdfLayerReference>,
     size: Option<(Mm, Mm)>,
     default_font: Option<IndirectFontRef>,
+    events: Vec<matplotrs_backend::Event>,
 }
 
 #[derive(Debug)]
@@ -32,6 +33,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             layer: None,
             size: None,
             default_font: None,
+            events: vec![matplotrs_backend::Event::SaveToFile, matplotrs_backend::Event::Render],
         }
     }
 
@@ -122,15 +124,24 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         }
     }
 
-    fn show(self)-> Result<i32, Self::Err> {
-        match self.doc {
+    fn next_event(&mut self) -> Option<matplotrs_backend::Event> {
+        self.events.pop()
+    }
+
+    fn save_to_file(&mut self)-> Result<(), Self::Err> {
+        let maybe_doc = self.doc.take();
+        match maybe_doc {
             None => Err(PdfError::BackEndError("No figure created!".to_owned())),
             Some(doc) => {
                 let mut writer = BufWriter::new(File::create("out.pdf")?);
                 doc.save(&mut writer)?;
-                Ok(0)
+                Ok(())
             }
         }
+    }
+
+    fn show(self)-> Result<i32, Self::Err> {
+        panic!("PrintPdf back-end does not support show()!")
     }
 }
 

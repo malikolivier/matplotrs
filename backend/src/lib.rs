@@ -5,6 +5,9 @@ pub trait Backend {
     fn draw_path(&mut self, path: &Path) -> Result<(), Self::Err>;
     fn draw_text(&mut self, text: &Text) -> Result<(), Self::Err>;
     fn draw_image(&mut self, image: &Image) -> Result<(), Self::Err>;
+    /// Iterate over each event in the backend
+    fn next_event(&mut self) -> Option<Event>;
+    fn save_to_file(&mut self)-> Result<(), Self::Err>;
     fn show(self) -> Result<i32, Self::Err>;
 }
 
@@ -39,4 +42,9 @@ pub enum Interpolation {
     None,
     Linear,
     Quadratic,
+}
+
+pub enum Event {
+    Render,
+    SaveToFile,
 }

@@ -25,6 +25,14 @@ impl matplotrs_backend::Backend for DummyBackend {
         Ok(())
     }
 
+    fn next_event(&mut self) -> Option<matplotrs_backend::Event> {
+        None
+    }
+
+    fn save_to_file(&mut self)-> Result<(), Self::Err> {
+        Ok(())
+    }
+
     fn show(self) -> Result<i32, Self::Err> {
         Ok(0)
     }
