@@ -24,8 +24,7 @@ pub struct PistonBackend {
 struct Figure {
     w: Window,
     id: matplotrs_backend::FigureId,
-    gl: GlGraphics, // OpenGL drawing backend.
-    rotation: f64,  // Rotation for the square.
+    gl: GlGraphics, // OpenGL drawing backend
 }
 
 #[derive(Debug)]
