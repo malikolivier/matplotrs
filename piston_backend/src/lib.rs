@@ -103,6 +103,7 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     fn show(mut self) -> Result<i32, Self::Err> {
+        // TODO Update this loop to support multiple figures
         for figure in self.figures.iter_mut() {
             let mut events = Events::new(EventSettings::new());
             while let Some(e) = events.next(&mut figure.w) {
