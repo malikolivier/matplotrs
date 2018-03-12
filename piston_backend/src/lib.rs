@@ -27,37 +27,6 @@ struct Figure {
     rotation: f64,  // Rotation for the square.
 }
 
-impl Figure {
-    fn render(&mut self, args: &RenderArgs) {
-        use graphics::*;
-
-        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-
-        let square = rectangle::square(0.0, 0.0, 50.0);
-        let rotation = self.rotation;
-        let (x, y) = ((args.width / 2) as f64, (args.height / 2) as f64);
-
-        self.gl.draw(args.viewport(), |c, gl| {
-            // Clear the screen.
-            clear(GREEN, gl);
-
-            let transform = c.transform
-                .trans(x, y)
-                .rot_rad(rotation)
-                .trans(-25.0, -25.0);
-
-            // Draw a box rotating around the middle of the screen.
-            rectangle(RED, square, transform, gl);
-        });
-    }
-
-    fn update(&mut self, args: &UpdateArgs) {
-        // Rotate 2 radians per second.
-        self.rotation += 2.0 * args.dt;
-    }
-}
-
 #[derive(Debug)]
 pub enum PistonError {
     BackEndError(String),
@@ -103,7 +72,32 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(id)
     }
 
-    fn draw_path(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+        use graphics::*;
+        let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
+        let gl = &mut fig.gl;
+        // TODO: Get real values here!
+        let view_port = Viewport {
+            rect: [0, 0, 1000, 1000],
+            draw_size: [1000, 1000],
+            window_size: [1000, 1000],
+        };
+        let (x, y) = (0.0, 0.0);
+        gl.draw(view_port, |c, gl| {
+            // TODO: clear somewhere else(fig background color, gl);
+            const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+            const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+            let line_color = path.line_color.map(to_webgl_color).unwrap_or(BLACK);
+            let transform = c.transform//.trans(x, y)
+                                       .trans(30.0, 30.0);
+            clear(WHITE, gl);
+            let my_line = [1.0, 1.0, 100.0, 100.0];
+            line(BLACK, 10.0, my_line, transform, gl);
+            // for &(x, y) in path.points.iter() {
+            //     let my_line = Line::new(line_color, 0.5);
+            //     line(my_line, transform, &DrawState::default(), gl, gl);
+            // }
+        });
         Ok(())
     }
 
@@ -148,6 +142,15 @@ impl From<String> for PistonError {
         PistonError::BackEndError(err)
     }
 }
+impl<'a> From<&'a str> for PistonError {
+    fn from(err: &str) -> Self {
+        PistonError::BackEndError(err.to_owned())
+    }
+}
+
+fn to_webgl_color((r, g, b, a): (f64, f64, f64, f64)) -> [f32; 4] {
+    [r as f32, g as f32, b as f32, a as f32]
+}
 
 fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
     match event {
@@ -171,8 +174,8 @@ fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
 }
 
 impl PistonBackend {
-    fn figure_by_id(&self, fig_id: matplotrs_backend::FigureId) -> Option<&Figure> {
-        for fig in self.figures.iter() {
+    fn figure_by_id(&mut self, fig_id: matplotrs_backend::FigureId) -> Option<&mut Figure> {
+        for fig in self.figures.iter_mut() {
             if fig.id == fig_id {
                 return Some(fig);
             }
