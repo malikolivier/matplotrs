@@ -6,10 +6,12 @@ authors = ["Malik Olivier Boussejra <malik@boussejra.com>"]
 [dependencies]
 matplotrs_backend = { path = "./backend" }
 matplotrs_amethyst_backend = { path = "./amethyst_backend", optional = true }
+matplotrs_conrod_backend = { path = "./conrod_backend", optional = true }
 matplotrs_printpdf_backend = { path = "./printpdf_backend", optional = true }
 
 [features]
 amethyst = ["matplotrs_amethyst_backend"]
+conrod = ["matplotrs_conrod_backend"]
 printpdf = ["matplotrs_printpdf_backend"]
 
 [dev-dependencies]
