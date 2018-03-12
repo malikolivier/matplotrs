@@ -37,7 +37,7 @@ pub struct Image {
     pub size: (f64, f64),
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct FigureId(pub usize);
 
 #[derive(Copy, Clone)]

@@ -15,6 +15,7 @@ pub struct PistonBackend {
     figures: Vec<Figure>,
     events: Events,
     figure_idx: usize,
+    /// Stored events that should be run next are in this vector
     event_stack: Vec<matplotrs_backend::Event>,
     figure_id_count: usize,
 }
@@ -72,7 +73,7 @@ impl matplotrs_backend::Backend for PistonBackend {
             figures: Vec::new(),
             events: Events::new(EventSettings::new()),
             figure_idx: 0,
-            event_stack: vec![matplotrs_backend::Event::Render],
+            event_stack: Vec::new(),
             figure_id_count: 0,
         }
     }
@@ -129,12 +130,14 @@ impl matplotrs_backend::Backend for PistonBackend {
                 if self.figure_idx >= len {
                     self.figure_idx = 0;
                 }
-                let event = {
+                let (event, fig_id) = {
                     let next_figure = &mut self.figures[self.figure_idx];
                     self.figure_idx += 1;
-                    self.events.next(&mut next_figure.w).and_then(convert_events)
+                    (self.events.next(&mut next_figure.w).and_then(convert_events), next_figure.id)
                 };
-                event.or_else(|| self.next_event())
+                event.map(|e| {
+                    matplotrs_backend::Event { e, fig_id }
+                }).or_else(|| self.next_event())
             }
         })
     }
@@ -146,7 +149,7 @@ impl From<String> for PistonError {
     }
 }
 
-fn convert_events(event: Event) -> Option<matplotrs_backend::Event> {
+fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
     match event {
         Event::Input(input) => match input {
             Input::Button(_args) => None, /* TODO Ignore for now! */
@@ -158,9 +161,9 @@ fn convert_events(event: Event) -> Option<matplotrs_backend::Event> {
             Input::Close(_) => None, /* TODO Ignore for now! */
         },
         Event::Loop(lp) => match lp {
-            Loop::Render(_args) => Some(matplotrs_backend::Event::Render),
+            Loop::Render(_args) => Some(matplotrs_backend::EventKind::Render),
             Loop::AfterRender(_args) => None,
-            Loop::Update(args) => Some(matplotrs_backend::Event::Update(args.dt)),
+            Loop::Update(args) => Some(matplotrs_backend::EventKind::Update(args.dt)),
             Loop::Idle(_args) => None,
         }
         _ => unimplemented!(),
