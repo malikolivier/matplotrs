@@ -17,6 +17,10 @@ impl matplotrs_backend::Backend for DummyBackend {
         Ok(matplotrs_backend::FigureId(0))
     }
 
+    fn clear_figure(&mut self, _: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+        Ok(())
+    }
+
     fn draw_path(
         &mut self,
         _: matplotrs_backend::FigureId,

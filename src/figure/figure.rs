@@ -77,6 +77,7 @@ impl Figure {
         be: &mut Backend,
         fig_id: FigureId,
     ) -> Result<(), <Backend as BackendTrait>::Err> {
+        be.clear_figure(fig_id)?;
         for artist in self.children.iter() {
             for path in artist.paths() {
                 be.draw_path(fig_id, &path)?;

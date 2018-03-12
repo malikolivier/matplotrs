@@ -3,6 +3,7 @@ pub trait Backend {
     fn new() -> Self;
     /// Return figure ID in back-end
     fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<FigureId, Self::Err>;
+    fn clear_figure(&mut self, fig_id: FigureId) -> Result<(), Self::Err>;
     fn draw_path(&mut self, fig_id: FigureId, path: &Path) -> Result<(), Self::Err>;
     fn draw_text(&mut self, fig_id: FigureId, text: &Text) -> Result<(), Self::Err>;
     fn draw_image(&mut self, fig_id: FigureId, image: &Image) -> Result<(), Self::Err>;

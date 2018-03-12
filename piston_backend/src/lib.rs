@@ -35,6 +35,8 @@ pub enum PistonError {
 
 // Change this to OpenGL::V2_1 if not working.
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
+const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 impl matplotrs_backend::Backend for PistonBackend {
     type Err = PistonError;
@@ -73,6 +75,16 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(id)
     }
 
+    fn clear_figure(&mut self, fig_id: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+        let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
+        let gl = &mut fig.gl;
+        gl.draw(to_webgl_viewport((1.0, 1.0)), |_, gl| {
+            use graphics::clear;
+            clear(WHITE, gl);
+        });
+        Ok(())
+    }
+
     fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
@@ -82,9 +94,6 @@ impl matplotrs_backend::Backend for PistonBackend {
         let view_port = to_webgl_viewport((fig_width, fig_height));
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         gl.draw(view_port, |c, gl| {
-            // TODO: clear somewhere else(fig background color, gl);
-            const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-            clear(WHITE, gl);
             let line_color = path.line_color.map(to_webgl_color).unwrap_or(BLACK);
             // This transformation puts origin at the center of the viewport and
             // scale the axes so that all values between coordinates -1 and 1
@@ -93,7 +102,7 @@ impl matplotrs_backend::Backend for PistonBackend {
             let p1_iter = path.points.iter();
             let p2_iter = path.points.iter().skip(1);
             for (p1, p2) in p1_iter.zip(p2_iter) {
-                line(line_color, 0.005, [p1.0, p1.1, p2.0, p2.1], transform, gl);
+                line(line_color, 0.002, [p1.0, p1.1, p2.0, p2.1], transform, gl);
             }
         });
         Ok(())

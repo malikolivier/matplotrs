@@ -67,6 +67,11 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         Ok(new_fig_id)
     }
 
+    /// Nothing to do
+    fn clear_figure(&mut self, _: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+        Ok(())
+    }
+
     fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         let points = path.points.iter().map(|coords| {
             let (x_pdf, y_pdf) = self.transform(&fig_id, coords);
