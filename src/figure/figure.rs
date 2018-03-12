@@ -72,19 +72,19 @@ impl Figure {
         Ok(be.new_figure(title, size)?)
     }
 
-    pub fn render(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+    pub fn render(&self, be: &mut Backend, fig_id: FigureId) -> Result<(), <Backend as BackendTrait>::Err> {
         for artist in self.children.iter() {
             for path in artist.paths() {
-                be.draw_path(&path)?;
+                be.draw_path(fig_id, &path)?;
             }
             for text in artist.texts() {
-                be.draw_text(&text)?;
+                be.draw_text(fig_id, &text)?;
             }
             for image in artist.images() {
-                be.draw_image(&image)?;
+                be.draw_image(fig_id, &image)?;
             }
             // Draw inner objects for axis
-            artist.render_children(be)?;
+            artist.render_children(fig_id, be)?;
         }
         Ok(())
     }

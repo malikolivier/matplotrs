@@ -15,7 +15,7 @@ pub trait Artist {
     }
 
     /// Do nothing. Override if the type has children that should be rendered
-    fn render_children(&self, _be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+    fn render_children(&self, _fig_id: matplotrs_backend::FigureId, _be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
         Ok(())
     }
 }

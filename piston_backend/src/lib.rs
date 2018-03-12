@@ -103,15 +103,15 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(id)
     }
 
-    fn draw_path(&mut self, _: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         Ok(())
     }
 
-    fn draw_text(&mut self, _: &matplotrs_backend::Text) -> Result<(), Self::Err> {
+    fn draw_text(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Text) -> Result<(), Self::Err> {
         Ok(())
     }
 
-    fn draw_image(&mut self, _: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+    fn draw_image(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Image) -> Result<(), Self::Err> {
         Ok(())
     }
 

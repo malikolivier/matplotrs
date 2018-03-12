@@ -37,10 +37,10 @@ impl App {
                 EventKind::Render => {
                     let maybe_fig = self.figure_by_id(event.fig_id);
                     match maybe_fig {
-                        Some(ref fig) => fig.render(&mut be)?,
-                        None          => eprintln!("[WARN] Could not find figure with given ID..."),
+                        Some(ref fig) => fig.render(&mut be, event.fig_id)?,
+                        None => eprintln!("[WARN] Could not find figure with given ID..."),
                     }
-                },
+                }
                 EventKind::Update(_dt) => (), /* NOOP for the time being */
                 EventKind::SaveToFile => be.save_to_file()?,
             };

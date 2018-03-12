@@ -34,22 +34,22 @@ impl Artist for Axes {
         ]
     }
 
-    fn render_children(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+    fn render_children(&self, fig_id: matplotrs_backend::FigureId, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
         for artist in self.children.iter() {
             for path in artist.paths() {
                 // Need to transform path's position for it to be used here!
                 let path = self.transform_path(path);
-                be.draw_path(&path)?;
+                be.draw_path(fig_id, &path)?;
             }
             for text in artist.texts() {
                 let text = self.transform_text(text);
-                be.draw_text(&text)?;
+                be.draw_text(fig_id, &text)?;
             }
             for image in artist.images() {
                 let image = self.transform_image(image);
-                be.draw_image(&image)?;
+                be.draw_image(fig_id, &image)?;
             }
-            artist.render_children(be)?;
+            artist.render_children(fig_id, be)?;
         }
         Ok(())
     }
