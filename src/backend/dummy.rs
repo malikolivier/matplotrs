@@ -11,13 +11,16 @@ impl matplotrs_backend::Backend for DummyBackend {
 
     fn new_figure(
         &mut self,
-        _title: &str,
-        _size: &(f64, f64),
+        _: &matplotrs_backend::FigureRepr,
     ) -> Result<matplotrs_backend::FigureId, Self::Err> {
         Ok(matplotrs_backend::FigureId(0))
     }
 
-    fn clear_figure(&mut self, _: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+    fn clear_figure(
+        &mut self,
+        _: matplotrs_backend::FigureId,
+        _: &matplotrs_backend::FigureRepr,
+    ) -> Result<(), Self::Err> {
         Ok(())
     }
 

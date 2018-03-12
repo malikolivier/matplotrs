@@ -1,3 +1,5 @@
+/// PrintPdf backend
+/// TODO: DPI and figure facecolor support (among others)
 pub extern crate matplotrs_backend;
 pub use matplotrs_backend::Backend;
 extern crate printpdf;
@@ -46,8 +48,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<matplotrs_backend::FigureId, Self::Err> {
+    fn new_figure(&mut self, figure: &matplotrs_backend::FigureRepr) -> Result<matplotrs_backend::FigureId, Self::Err> {
         self.page_count += 1;
+        let size = &figure.size;
+        let title = figure.title.as_str();
         let new_fig_id = matplotrs_backend::FigureId(self.page_count);
         match self.doc {
             None => {
@@ -68,7 +72,7 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
     }
 
     /// Nothing to do
-    fn clear_figure(&mut self, _: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+    fn clear_figure(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::FigureRepr) -> Result<(), Self::Err> {
         Ok(())
     }
 

@@ -2,8 +2,8 @@ pub trait Backend {
     type Err;
     fn new() -> Self;
     /// Return figure ID in back-end
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<FigureId, Self::Err>;
-    fn clear_figure(&mut self, fig_id: FigureId) -> Result<(), Self::Err>;
+    fn new_figure(&mut self, figure: &FigureRepr) -> Result<FigureId, Self::Err>;
+    fn clear_figure(&mut self, fig_id: FigureId, figure: &FigureRepr) -> Result<(), Self::Err>;
     fn draw_path(&mut self, fig_id: FigureId, path: &Path) -> Result<(), Self::Err>;
     fn draw_text(&mut self, fig_id: FigureId, text: &Text) -> Result<(), Self::Err>;
     fn draw_image(&mut self, fig_id: FigureId, image: &Image) -> Result<(), Self::Err>;
@@ -36,6 +36,13 @@ pub struct Image {
     /// Actual size when displayed. The image will be scaled to be exactly this size in the
     /// container's coordinates
     pub size: (f64, f64),
+}
+
+pub struct FigureRepr {
+    pub title: String,
+    pub size: (f64, f64),
+    pub dpi: f64,
+    pub facecolor: (f64, f64, f64, f64),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]

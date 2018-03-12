@@ -1,5 +1,5 @@
 use backend::Backend;
-use matplotrs_backend::{Backend as BackendTrait, FigureId};
+use matplotrs_backend::{Backend as BackendTrait, FigureId, FigureRepr};
 use color::Color;
 use artist::Artist;
 
@@ -67,9 +67,7 @@ impl Figure {
     }
 
     pub fn create(&self, be: &mut Backend) -> Result<FigureId, <Backend as BackendTrait>::Err> {
-        let title = self.title().unwrap_or("Figure");
-        let size = &self.f.figsize;
-        Ok(be.new_figure(title, size)?)
+        Ok(be.new_figure(&self.backend_representation())?)
     }
 
     pub fn render(
@@ -77,7 +75,7 @@ impl Figure {
         be: &mut Backend,
         fig_id: FigureId,
     ) -> Result<(), <Backend as BackendTrait>::Err> {
-        be.clear_figure(fig_id)?;
+        be.clear_figure(fig_id, &self.backend_representation())?;
         for artist in self.children.iter() {
             for path in artist.paths() {
                 be.draw_path(fig_id, &path)?;
@@ -92,6 +90,18 @@ impl Figure {
             artist.render_children(fig_id, be)?;
         }
         Ok(())
+    }
+
+    fn backend_representation(&self) -> FigureRepr {
+        FigureRepr {
+            title: self.title().unwrap_or("Figure").to_owned(),
+            size: self.f.figsize,
+            dpi: self.f.dpi,
+            facecolor: {
+                let Color(r, g, b, a) = self.f.facecolor;
+                (r, g, b, a)
+            },
+        }
     }
 }
 

@@ -34,7 +34,6 @@ pub enum PistonError {
 
 // Change this to OpenGL::V2_1 if not working.
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
-const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 impl matplotrs_backend::Backend for PistonBackend {
@@ -49,13 +48,13 @@ impl matplotrs_backend::Backend for PistonBackend {
         }
     }
 
-    fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<matplotrs_backend::FigureId, Self::Err> {
+    fn new_figure(&mut self, figure: &matplotrs_backend::FigureRepr) -> Result<matplotrs_backend::FigureId, Self::Err> {
         if self.figures.len() > 0 {
             return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()))
         }
-        let &(x, y) = size;
+        let (x, y) = figure.size;
         let window = WindowSettings::new(
-                title,
+                figure.title.clone(),
                 [x as u32, y as u32]
             )
             .opengl(OPENGL_VERSION)
@@ -68,18 +67,19 @@ impl matplotrs_backend::Backend for PistonBackend {
             w: window,
             id,
             gl: GlGraphics::new(OPENGL_VERSION),
-            rotation: 0.0,
         });
         self.figure_id_count += 1;
         Ok(id)
     }
 
-    fn clear_figure(&mut self, fig_id: matplotrs_backend::FigureId) -> Result<(), Self::Err> {
+    /// Clear figure: Set background color and window name (TODO)
+    fn clear_figure(&mut self, fig_id: matplotrs_backend::FigureId, figure: &matplotrs_backend::FigureRepr) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
         let gl = &mut fig.gl;
+        let color = to_webgl_color(figure.facecolor);
         gl.draw(to_webgl_viewport((1.0, 1.0)), |_, gl| {
             use graphics::clear;
-            clear(WHITE, gl);
+            clear(color, gl);
         });
         Ok(())
     }
