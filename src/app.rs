@@ -44,7 +44,6 @@ impl App {
                 EventKind::Resize(w, h) => self.map_on_figure_by_id(event.fig_id, |fig| {
                     fig.set_figsize(w, h);
                 })?,
-
             };
         }
         Ok(0)
@@ -60,7 +59,8 @@ impl App {
     }
 
     fn map_on_figure_by_id<F, U>(&mut self, id: FigureId, mut f: F) -> Result<U, String>
-        where F: FnMut(&mut Figure) -> U
+    where
+        F: FnMut(&mut Figure) -> U,
     {
         let mut maybe_fig = self.figure_by_id(id);
         match maybe_fig {
@@ -70,8 +70,9 @@ impl App {
     }
 
     fn map_on_figure_by_id_safe<F, U, E>(&mut self, id: FigureId, mut f: F) -> Result<U, E>
-        where F: FnMut(&mut Figure) -> Result<U, E>,
-              E: From<&'static str>,
+    where
+        F: FnMut(&mut Figure) -> Result<U, E>,
+        E: From<&'static str>,
     {
         let mut maybe_fig = self.figure_by_id(id);
         match maybe_fig {
