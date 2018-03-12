@@ -128,11 +128,7 @@ impl matplotrs_backend::Backend for PistonBackend {
                     self.figure_idx += 1;
                     self.events.next(&mut next_figure.w).and_then(convert_events)
                 };
-                if event.is_none() {
-                    self.next_event()
-                } else {
-                    event
-                }
+                event.or_else(|| self.next_event())
             }
         })
     }
@@ -147,13 +143,13 @@ impl From<String> for PistonError {
 fn convert_events(event: Event) -> Option<matplotrs_backend::Event> {
     match event {
         Event::Input(input) => match input {
+            Input::Button(_args) => None, /* TODO Ignore for now! */
+            Input::Move(_motion) => None, /* TODO Ignore for now! */
+            Input::Text(_) => None, /* TODO Ignore for now! */
             Input::Resize(_w, _h) => None,
             Input::Focus(_focus) => None,
-            Input::Move(_motion) => None, /* TODO Ignore for now! */
             Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
-            Input::Button(_args) => None, /* TODO Ignore for now! */
             Input::Close(_) => None, /* TODO Ignore for now! */
-            _ => unimplemented!(),
         },
         Event::Loop(lp) => match lp {
             Loop::Render(_args) => Some(matplotrs_backend::Event::Render),
