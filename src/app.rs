@@ -30,6 +30,7 @@ impl App {
         while let Some(event) = be.next_event() {
             match event {
                 Event::Render => self.render(&mut be)?,
+                Event::Update(_dt) => (), /* NOOP for the time being */
                 Event::SaveToFile => be.save_to_file()?,
             };
         }

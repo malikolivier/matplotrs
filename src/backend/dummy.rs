@@ -29,7 +29,7 @@ impl matplotrs_backend::Backend for DummyBackend {
         None
     }
 
-    fn save_to_file(&mut self)-> Result<(), Self::Err> {
+    fn save_to_file(&mut self) -> Result<(), Self::Err> {
         Ok(())
     }
 

@@ -46,5 +46,7 @@ pub enum Interpolation {
 
 pub enum Event {
     Render,
+    /// Update arguments, containing delta time in seconds
+    Update(f64),
     SaveToFile,
 }
