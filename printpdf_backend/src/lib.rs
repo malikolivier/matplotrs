@@ -4,13 +4,15 @@ extern crate printpdf;
 
 use std::fs::File;
 use std::io::BufWriter;
+use std::collections::HashMap;
 
 use printpdf::{PdfDocument, PdfDocumentReference, PdfLayerReference, Mm, BuiltinFont, IndirectFontRef, ImageXObject, Image, Px, ColorSpace, ColorBits};
 
 pub struct PrintPdfBackend {
     doc: Option<PdfDocumentReference>,
-    layer: Option<PdfLayerReference>,
-    size: Option<(Mm, Mm)>,
+    page_count: usize,
+    layers: HashMap<matplotrs_backend::FigureId, PdfLayerReference>,
+    sizes: HashMap<matplotrs_backend::FigureId, (Mm, Mm)>,
     default_font: Option<IndirectFontRef>,
     events: Vec<matplotrs_backend::Event>,
 }
@@ -25,50 +27,49 @@ pub enum PdfError {
 const DEFAULT_FONT: BuiltinFont = BuiltinFont::TimesRoman;
 const DEFAULT_DPI: f64 = 300.0;
 
-/// Dummy figure ID. Indeed PDF does not have concept of `figure`,
-/// so always us this dummy as place holder
-const DUMMY_FIG_ID: matplotrs_backend::FigureId = matplotrs_backend::FigureId(0);
-
 impl matplotrs_backend::Backend for PrintPdfBackend {
     type Err = PdfError;
     fn new() -> Self {
         PrintPdfBackend {
             doc: None,
-            layer: None,
-            size: None,
+            page_count: 0,
+            layers: HashMap::new(),
+            sizes: HashMap::new(),
             default_font: None,
             events: vec![matplotrs_backend::Event {
-                fig_id: DUMMY_FIG_ID,
+                fig_id: matplotrs_backend::FigureId(1),
                 e: matplotrs_backend::EventKind::SaveToFile,
             }, matplotrs_backend::Event {
-                fig_id: DUMMY_FIG_ID,
+                fig_id: matplotrs_backend::FigureId(1),
                 e: matplotrs_backend::EventKind::Render,
             }],
         }
     }
 
     fn new_figure(&mut self, title: &str, size: &(f64, f64)) -> Result<matplotrs_backend::FigureId, Self::Err> {
+        self.page_count += 1;
+        let new_fig_id = matplotrs_backend::FigureId(self.page_count);
         match self.doc {
             None => {
                 let (doc, page1, layer1) = PdfDocument::new(title, Mm(size.0), Mm(size.1), "Layer 1");
                 let layer = doc.get_page(page1).get_layer(layer1);
                 let default_font = doc.add_builtin_font(DEFAULT_FONT)?;
                 self.doc = Some(doc);
-                self.layer = Some(layer);
+                self.layers.insert(new_fig_id, layer);
                 self.default_font = Some(default_font);
             },
             Some(ref mut doc) => {
                 let (new_page, new_layer1) = doc.add_page(Mm(size.0), Mm(size.1), title);
-                self.layer = Some(doc.get_page(new_page).get_layer(new_layer1));
-            }
-        }
-        self.size = Some((Mm(size.0), Mm(size.1)));
-        Ok(DUMMY_FIG_ID)
+                self.layers.insert(new_fig_id, doc.get_page(new_page).get_layer(new_layer1));
+            },
+        };
+        self.sizes.insert(new_fig_id, (Mm(size.0), Mm(size.1)));
+        Ok(new_fig_id)
     }
 
-    fn draw_path(&mut self, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         let points = path.points.iter().map(|coords| {
-            let (x_pdf, y_pdf) = self.transform(coords);
+            let (x_pdf, y_pdf) = self.transform(&fig_id, coords);
             (printpdf::Point::new(x_pdf, y_pdf), false)
         }).collect();
         let line = printpdf::Line {
@@ -78,8 +79,8 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             has_stroke: path.line_color.is_some(),
             is_clipping_path: false,
         };
-        let layer = self.layer.as_ref().ok_or_else(|| {
-            PdfError::BackEndError("No figure created!".to_owned())
+        let layer = self.layer_by_fig_id(&fig_id).ok_or_else(|| {
+            PdfError::BackEndError("Layer not found!".to_owned())
         })?;
         if let Some(color) = path.fill_color {
             let fill_color = printpdf::Color::Rgb(printpdf::Rgb::new(color.0, color.1, color.2, None));
@@ -93,12 +94,12 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         Ok(())
     }
 
-    fn draw_text(&mut self, text: &matplotrs_backend::Text) -> Result<(), Self::Err> {
-        match (self.layer.as_ref(), self.default_font.as_ref()) {
-            (None, _) => Err(PdfError::BackEndError("No layer!".to_owned())),
+    fn draw_text(&mut self, fig_id: matplotrs_backend::FigureId, text: &matplotrs_backend::Text) -> Result<(), Self::Err> {
+        match (self.layer_by_fig_id(&fig_id), self.default_font.as_ref()) {
+            (None, _) => Err(PdfError::BackEndError("Layer not found!".to_owned())),
             (_, None) => Err(PdfError::BackEndError("No font!".to_owned())),
             (Some(layer), Some(font)) => {
-                let (x_pdf, y_pdf) = self.transform(&text.point);
+                let (x_pdf, y_pdf) = self.transform(&fig_id, &text.point);
                 layer.begin_text_section();
                 layer.set_font(&font, text.font_size as i64);
                 layer.set_text_cursor(x_pdf, y_pdf);
@@ -109,10 +110,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
         }
     }
 
-    fn draw_image(&mut self, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
-        match self.layer {
-            None => Err(PdfError::BackEndError("No layer!".to_owned())),
-            Some(ref layer) => {
+    fn draw_image(&mut self, fig_id: matplotrs_backend::FigureId, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+        match self.layer_by_fig_id(&fig_id) {
+            None => Err(PdfError::BackEndError("Layer not found!".to_owned())),
+            Some(layer) => {
                 let image_file = ImageXObject {
                     width: Px(image.width),
                     height: Px(image.height),
@@ -124,10 +125,10 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
                     clipping_bbox: None,
                 };
                 let pdf_image = Image::from(image_file);
-                let (wanted_w, wanted_h) = self.transform_size(&image.size);
+                let (wanted_w, wanted_h) = self.transform_size(&fig_id, &image.size);
                 let pdf_image_w = pdf_image.width(DEFAULT_DPI);
                 let pdf_image_h = pdf_image.height(DEFAULT_DPI);
-                let (x_pdf, y_pdf) = self.transform(&image.position);
+                let (x_pdf, y_pdf) = self.transform(&fig_id, &image.position);
                 pdf_image.add_to_layer(layer.clone(), Some(x_pdf), Some(y_pdf), None, Some(wanted_w.0 / pdf_image_w.0), Some(wanted_h.0 / pdf_image_h.0), Some(DEFAULT_DPI));
                 Ok(())
             }
@@ -152,13 +153,17 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
 }
 
 impl PrintPdfBackend {
-    fn transform(&self, &(x, y): &(f64, f64)) -> (Mm, Mm) {
-        let (Mm(rightmost), Mm(upmost)) = self.size.expect("Some size");
+    fn layer_by_fig_id(&self, fig_id: &matplotrs_backend::FigureId) -> Option<&PdfLayerReference> {
+        self.layers.get(fig_id)
+    }
+
+    fn transform(&self, fig_id: &matplotrs_backend::FigureId, &(x, y): &(f64, f64)) -> (Mm, Mm) {
+        let &(Mm(rightmost), Mm(upmost)) = self.sizes.get(fig_id).expect("Some size");
         (Mm(rightmost * (1.0 + x) / 2.0), Mm(upmost * (1.0 - y) / 2.0))
     }
 
-    fn transform_size(&self, &(along_x, along_y): &(f64, f64)) -> (Mm, Mm) {
-        let (Mm(rightmost), Mm(upmost)) = self.size.expect("Some size");
+    fn transform_size(&self, fig_id: &matplotrs_backend::FigureId, &(along_x, along_y): &(f64, f64)) -> (Mm, Mm) {
+        let &(Mm(rightmost), Mm(upmost)) = self.sizes.get(fig_id).expect("Some size");
         (Mm(along_x * rightmost / 2.0), Mm(along_y * upmost / 2.0))
     }
 

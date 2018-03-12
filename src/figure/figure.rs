@@ -72,7 +72,11 @@ impl Figure {
         Ok(be.new_figure(title, size)?)
     }
 
-    pub fn render(&self, be: &mut Backend, fig_id: FigureId) -> Result<(), <Backend as BackendTrait>::Err> {
+    pub fn render(
+        &self,
+        be: &mut Backend,
+        fig_id: FigureId,
+    ) -> Result<(), <Backend as BackendTrait>::Err> {
         for artist in self.children.iter() {
             for path in artist.paths() {
                 be.draw_path(fig_id, &path)?;

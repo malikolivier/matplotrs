@@ -34,7 +34,11 @@ impl Artist for Axes {
         ]
     }
 
-    fn render_children(&self, fig_id: matplotrs_backend::FigureId, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+    fn render_children(
+        &self,
+        fig_id: matplotrs_backend::FigureId,
+        be: &mut Backend,
+    ) -> Result<(), <Backend as BackendTrait>::Err> {
         for artist in self.children.iter() {
             for path in artist.paths() {
                 // Need to transform path's position for it to be used here!
