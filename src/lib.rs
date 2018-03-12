@@ -28,7 +28,13 @@ pub mod backend {
     pub type Backend = backend::PrintPdfBackend;
 }
 
-#[cfg(not(any(feature = "amethyst", feature = "printpdf")))]
+#[cfg(feature = "piston")]
+pub mod backend {
+    pub extern crate matplotrs_piston_backend as backend;
+    pub type Backend = backend::PistonBackend;
+}
+
+#[cfg(not(any(feature = "amethyst", feature = "printpdf", feature = "piston")))]
 pub mod backend {
     mod dummy;
     pub type Backend = dummy::DummyBackend;
