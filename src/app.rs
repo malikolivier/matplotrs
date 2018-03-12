@@ -4,7 +4,12 @@ use matplotrs_backend::Backend as BackendTrait;
 use figure::Figure;
 
 pub struct App {
-    pub figs: Vec<Figure>,
+    figs: Vec<FigureContainer>,
+}
+
+struct FigureContainer {
+    fig: Figure,
+    created: bool,
 }
 
 impl App {
@@ -13,29 +18,27 @@ impl App {
     }
 
     pub fn add_figure(&mut self, fig: Figure) {
-        self.figs.push(fig);
+        self.figs.push(FigureContainer {
+            fig,
+            created: false,
+        });
     }
 
-    pub fn render(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
+    pub fn start(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
         let mut be = Backend::new();
-        for fig in self.figs.iter() {
-            let title = fig.title().unwrap_or("Figure 1");
-            let size = &fig.f.figsize;
-            be.new_figure(title, size)?;
-            for artist in fig.children.iter() {
-                for path in artist.paths() {
-                    be.draw_path(&path)?;
-                }
-                for text in artist.texts() {
-                    be.draw_text(&text)?;
-                }
-                for image in artist.images() {
-                    be.draw_image(&image)?;
-                }
-                // Draw inner objects for axis
-                artist.render_children(&mut be)?;
-            }
-        }
+        self.render(&mut be)?;
         be.show()
+    }
+
+    fn render(&mut self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+        for fig_container in self.figs.iter_mut() {
+            let fig = &fig_container.fig;
+            if !fig_container.created {
+                fig.create(be)?;
+                fig_container.created = true;
+            }
+            fig.render(be)?;
+        }
+        Ok(())
     }
 }

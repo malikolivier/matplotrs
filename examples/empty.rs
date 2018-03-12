@@ -35,5 +35,5 @@ fn run(app: &mut App) {
         .build();
     app.add_figure(fig2);
     // Render!
-    app.render().unwrap();
+    app.start().unwrap();
 }

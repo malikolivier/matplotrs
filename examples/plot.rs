@@ -26,5 +26,5 @@ fn main() {
     axes.add_child(plot);
     fig.add_child(axes);
     app.add_figure(fig);
-    app.render().unwrap();
+    app.start().unwrap();
 }

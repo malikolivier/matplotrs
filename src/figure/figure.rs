@@ -1,3 +1,5 @@
+use backend::Backend;
+use matplotrs_backend::Backend as BackendTrait;
 use color::Color;
 use artist::Artist;
 
@@ -62,6 +64,30 @@ impl Figure {
 
     pub fn title(&self) -> Option<&str> {
         self.f.title.as_ref().map(String::as_str)
+    }
+
+    pub fn create(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+        let title = self.title().unwrap_or("Figure");
+        let size = &self.f.figsize;
+        be.new_figure(title, size)?;
+        Ok(())
+    }
+
+    pub fn render(&self, be: &mut Backend) -> Result<(), <Backend as BackendTrait>::Err> {
+        for artist in self.children.iter() {
+            for path in artist.paths() {
+                be.draw_path(&path)?;
+            }
+            for text in artist.texts() {
+                be.draw_text(&text)?;
+            }
+            for image in artist.images() {
+                be.draw_image(&image)?;
+            }
+            // Draw inner objects for axis
+            artist.render_children(be)?;
+        }
+        Ok(())
     }
 }
 
