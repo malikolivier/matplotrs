@@ -63,8 +63,12 @@ pub struct Event {
 
 #[derive(Debug)]
 pub enum EventKind {
+    /// Then backend asks a figure to be rendered again
     Render,
     /// Update arguments, containing delta time in seconds
     Update(f64),
+    /// Emitted when the backend requests to save a file (mainly used for static backends)
     SaveToFile,
+    /// Emitted when a window has been resized to size the following (width, height) in pixels
+    Resize(u32, u32),
 }

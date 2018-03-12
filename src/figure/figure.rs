@@ -66,6 +66,10 @@ impl Figure {
         self.f.title.as_ref().map(String::as_str)
     }
 
+    pub fn set_figsize<W: Into<f64>, H: Into<f64>>(&mut self, width: W, height: H) {
+        self.f.figsize = (width.into(), height.into());
+    }
+
     pub fn create(&self, be: &mut Backend) -> Result<FigureId, <Backend as BackendTrait>::Err> {
         Ok(be.new_figure(&self.backend_representation())?)
     }

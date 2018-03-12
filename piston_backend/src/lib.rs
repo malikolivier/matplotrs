@@ -171,20 +171,21 @@ fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
 }
 
 fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
+    use matplotrs_backend::EventKind;
     match event {
         Event::Input(input) => match input {
             Input::Button(_args) => None, /* TODO Ignore for now! */
             Input::Move(_motion) => None, /* TODO Ignore for now! */
             Input::Text(_) => None, /* TODO Ignore for now! */
-            Input::Resize(_w, _h) => None,
+            Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
             Input::Focus(_focus) => None,
             Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
             Input::Close(_) => None, /* TODO Ignore for now! */
         },
         Event::Loop(lp) => match lp {
-            Loop::Render(_args) => Some(matplotrs_backend::EventKind::Render),
+            Loop::Render(_args) => Some(EventKind::Render),
             Loop::AfterRender(_args) => None,
-            Loop::Update(args) => Some(matplotrs_backend::EventKind::Update(args.dt)),
+            Loop::Update(args) => Some(EventKind::Update(args.dt)),
             Loop::Idle(_args) => None,
         }
         _ => unimplemented!(),

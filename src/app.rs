@@ -34,26 +34,36 @@ impl App {
         // Event loop
         while let Some(event) = be.next_event() {
             match event.e {
-                EventKind::Render => {
-                    let maybe_fig = self.figure_by_id(event.fig_id);
-                    match maybe_fig {
-                        Some(ref fig) => fig.render(&mut be, event.fig_id)?,
-                        None => eprintln!("[WARN] Could not find figure with given ID..."),
-                    }
-                }
+                EventKind::Render => self.map_on_figure_by_id(event.fig_id, |fig| {
+                    fig.render(&mut be, event.fig_id);
+                })?,
                 EventKind::Update(_dt) => (), /* NOOP for the time being */
                 EventKind::SaveToFile => be.save_to_file()?,
+                EventKind::Resize(w, h) => self.map_on_figure_by_id(event.fig_id, |fig| {
+                    fig.set_figsize(w, h);
+                })?,
+
             };
         }
         Ok(0)
     }
 
-    fn figure_by_id(&self, id: FigureId) -> Option<&Figure> {
-        for fig_container in self.figs.iter() {
+    fn figure_by_id(&mut self, id: FigureId) -> Option<&mut Figure> {
+        for fig_container in self.figs.iter_mut() {
             if fig_container.id.is_some() && fig_container.id.unwrap() == id {
-                return Some(&fig_container.fig);
+                return Some(&mut fig_container.fig);
             }
         }
         None
+    }
+
+    fn map_on_figure_by_id<F, U>(&mut self, id: FigureId, mut f: F) -> Result<U, String>
+        where F: FnMut(&mut Figure) -> U
+    {
+        let mut maybe_fig = self.figure_by_id(id);
+        match maybe_fig {
+            Some(ref mut fig) => Ok(f(fig)),
+            None => Err("Could not find figure with given ID...".to_owned()),
+        }
     }
 }
