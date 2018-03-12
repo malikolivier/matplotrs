@@ -13,6 +13,8 @@ struct FigureContainer {
     id: Option<FigureId>,
 }
 
+type BackEndError = <Backend as BackendTrait>::Err;
+
 impl App {
     pub fn new() -> App {
         App { figs: Vec::new() }
@@ -22,7 +24,7 @@ impl App {
         self.figs.push(FigureContainer { fig, id: None });
     }
 
-    pub fn start(&mut self) -> Result<i32, <Backend as BackendTrait>::Err> {
+    pub fn start(&mut self) -> Result<i32, BackEndError> {
         let mut be = Backend::new();
         // Init figures
         for fig_container in self.figs.iter_mut() {
@@ -34,8 +36,8 @@ impl App {
         // Event loop
         while let Some(event) = be.next_event() {
             match event.e {
-                EventKind::Render => self.map_on_figure_by_id(event.fig_id, |fig| {
-                    fig.render(&mut be, event.fig_id);
+                EventKind::Render => self.map_on_figure_by_id_safe(event.fig_id, |fig| {
+                    fig.render(&mut be, event.fig_id)
                 })?,
                 EventKind::Update(_dt) => (), /* NOOP for the time being */
                 EventKind::SaveToFile => be.save_to_file()?,
@@ -64,6 +66,17 @@ impl App {
         match maybe_fig {
             Some(ref mut fig) => Ok(f(fig)),
             None => Err("Could not find figure with given ID...".to_owned()),
+        }
+    }
+
+    fn map_on_figure_by_id_safe<F, U, E>(&mut self, id: FigureId, mut f: F) -> Result<U, E>
+        where F: FnMut(&mut Figure) -> Result<U, E>,
+              E: From<&'static str>,
+    {
+        let mut maybe_fig = self.figure_by_id(id);
+        match maybe_fig {
+            Some(ref mut fig) => Ok(f(fig)?),
+            None => Err(From::from("Could not find figure with given ID...")),
         }
     }
 }
