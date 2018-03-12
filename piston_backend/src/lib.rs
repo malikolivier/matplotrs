@@ -10,6 +10,7 @@ use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
+use graphics::Viewport;
 
 pub struct PistonBackend {
     figures: Vec<Figure>,
@@ -77,26 +78,23 @@ impl matplotrs_backend::Backend for PistonBackend {
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
         let gl = &mut fig.gl;
         // TODO: Get real values here!
-        let view_port = Viewport {
-            rect: [0, 0, 1000, 1000],
-            draw_size: [1000, 1000],
-            window_size: [1000, 1000],
-        };
-        let (x, y) = (0.0, 0.0);
+        let (fig_width, fig_height) = (1000.0, 1000.0);
+        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         gl.draw(view_port, |c, gl| {
             // TODO: clear somewhere else(fig background color, gl);
             const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-            const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-            let line_color = path.line_color.map(to_webgl_color).unwrap_or(BLACK);
-            let transform = c.transform//.trans(x, y)
-                                       .trans(30.0, 30.0);
             clear(WHITE, gl);
-            let my_line = [1.0, 1.0, 100.0, 100.0];
-            line(BLACK, 10.0, my_line, transform, gl);
-            // for &(x, y) in path.points.iter() {
-            //     let my_line = Line::new(line_color, 0.5);
-            //     line(my_line, transform, &DrawState::default(), gl, gl);
-            // }
+            let line_color = path.line_color.map(to_webgl_color).unwrap_or(BLACK);
+            // This transformation puts origin at the center of the viewport and
+            // scale the axes so that all values between coordinates -1 and 1
+            // are the edge of the screen.
+            let transform = c.transform.trans(x, y).scale(x, y);
+            let p1_iter = path.points.iter();
+            let p2_iter = path.points.iter().skip(1);
+            for (p1, p2) in p1_iter.zip(p2_iter) {
+                line(line_color, 0.005, [p1.0, p1.1, p2.0, p2.1], transform, gl);
+            }
         });
         Ok(())
     }
@@ -150,6 +148,14 @@ impl<'a> From<&'a str> for PistonError {
 
 fn to_webgl_color((r, g, b, a): (f64, f64, f64, f64)) -> [f32; 4] {
     [r as f32, g as f32, b as f32, a as f32]
+}
+
+fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
+    Viewport {
+        rect: [0, 0, width_px as i32, height_px as i32],
+        draw_size: [width_px as u32, height_px as u32],
+        window_size: [width_px as u32, height_px as u32],
+    }
 }
 
 fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
