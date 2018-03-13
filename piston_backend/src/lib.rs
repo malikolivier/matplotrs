@@ -41,6 +41,7 @@ pub enum PistonError {
 
 // Change this to OpenGL::V2_1 if not working.
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
+const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 impl matplotrs_backend::Backend for PistonBackend {
     type Err = PistonError;
@@ -131,7 +132,16 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(())
     }
 
-    fn draw_text(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Text) -> Result<(), Self::Err> {
+    fn draw_text(&mut self, fig_id: matplotrs_backend::FigureId, text_to_draw: &matplotrs_backend::Text) -> Result<(), Self::Err> {
+        use graphics::*;
+        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
+        let (fig_width, fig_height) = fig.cached_size;
+        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let (x, y) = (fig_width / 2.0, fig_height / 2.0);
+        fig.gl.draw(view_port, |c, gl| {
+            let transform = c.transform.trans(x, y).scale(x, y);
+            text(BLACK, text_to_draw.font_size as u32, text_to_draw.text.as_str(), cache, transform, gl);
+        });
         Ok(())
     }
 
