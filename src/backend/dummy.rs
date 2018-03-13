@@ -3,7 +3,7 @@ use matplotrs_backend;
 pub struct DummyBackend;
 
 impl matplotrs_backend::Backend for DummyBackend {
-    type Err = !;
+    type Err = DummyErr;
 
     fn new() -> Self {
         DummyBackend
@@ -54,5 +54,20 @@ impl matplotrs_backend::Backend for DummyBackend {
 
     fn save_to_file(&mut self) -> Result<(), Self::Err> {
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct DummyErr;
+
+impl<'a> From<&'a str> for DummyErr {
+    fn from(_: &str) -> Self {
+        DummyErr
+    }
+}
+
+impl From<String> for DummyErr {
+    fn from(_: String) -> Self {
+        DummyErr
     }
 }
