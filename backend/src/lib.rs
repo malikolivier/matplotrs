@@ -71,4 +71,6 @@ pub enum EventKind {
     SaveToFile,
     /// Emitted when a window has been resized to size the following (width, height) in pixels
     Resize(u32, u32),
+    /// A window is closed
+    Close
 }

@@ -163,7 +163,6 @@ impl matplotrs_backend::Backend for PistonBackend {
             let len = self.figures.len();
             if len == 0 {
                 // No figure, so nothing to do
-                println!("No more event to process in Piston backend!");
                 None
             } else {
                 if self.figure_idx >= len {
@@ -175,6 +174,10 @@ impl matplotrs_backend::Backend for PistonBackend {
                     (self.events.next(&mut next_figure.w).and_then(convert_events), next_figure.id)
                 };
                 event.map(|e| {
+                    if let matplotrs_backend::EventKind::Close = e {
+                        // A figure has been closed. We must remove it from the figure list.
+                        self.remove_figure(fig_id);
+                    }
                     matplotrs_backend::Event { e, fig_id }
                 }).or_else(|| self.next_event())
             }
@@ -229,7 +232,7 @@ fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
             Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
             Input::Focus(_focus) => None,
             Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
-            Input::Close(_) => None, /* TODO Ignore for now! */
+            Input::Close(_) => Some(EventKind::Close),
         },
         Event::Loop(lp) => match lp {
             Loop::Render(_args) => Some(EventKind::Render),
@@ -249,6 +252,10 @@ impl PistonBackend {
             }
         }
         None
+    }
+
+    fn remove_figure(&mut self, fig_id: matplotrs_backend::FigureId) {
+        self.figures.retain(|fig| fig.id != fig_id);
     }
 }
 
