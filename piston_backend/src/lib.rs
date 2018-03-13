@@ -88,6 +88,7 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(())
     }
 
+    /// Draw path to using OpenGL drawing backend. TODO: Support for fill_color
     fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
@@ -102,10 +103,17 @@ impl matplotrs_backend::Backend for PistonBackend {
             let transform = c.transform.trans(x, y).scale(x, y);
             // Do not draw line if no color is provided
             path.line_color.map(to_webgl_color).map(|line_color| {
+                // Draw a collection of lines
                 let p1_iter = path.points.iter();
                 let p2_iter = path.points.iter().skip(1);
                 for (p1, p2) in p1_iter.zip(p2_iter) {
                     line(line_color, 0.002, [p1.0, p1.1, p2.0, p2.1], transform, gl);
+                }
+                if path.closed && !path.points.is_empty() {
+                    // Draw last point
+                    let &(x1, y1) = path.points.last().unwrap();
+                    let &(x2, y2) = path.points.first().unwrap();
+                    line(line_color, 0.002, [x1, y1, x2, y2], transform, gl);
                 }
             });
         });
