@@ -61,7 +61,7 @@ impl matplotrs_backend::Backend for PistonBackend {
                 [x as u32, y as u32]
             )
             .opengl(OPENGL_VERSION)
-            // ↓ Required for this bug https://github.com/PistonDevelopers/piston/issues/1202
+            // ↓ Required to work around this bug: https://github.com/PistonDevelopers/piston/issues/1202
             .srgb(false)
             .exit_on_esc(true)
             .build()?;
