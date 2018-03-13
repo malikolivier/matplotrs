@@ -117,7 +117,7 @@ impl matplotrs_backend::Backend for PistonBackend {
                     line(line_color, 0.002, [p1.0, p1.1, p2.0, p2.1], transform, gl);
                 }
                 if path.closed && !path.points.is_empty() {
-                    // Draw last point
+                    // Draw last line to close the path
                     let &(x1, y1) = path.points.last().unwrap();
                     let &(x2, y2) = path.points.first().unwrap();
                     line(line_color, 0.002, [x1, y1, x2, y2], transform, gl);
