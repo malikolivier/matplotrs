@@ -1,5 +1,5 @@
 use backend::Backend;
-use matplotrs_backend::{Backend as BackendTrait, FigureId, FigureRepr};
+use matplotrs_backend::{Backend as BackendTrait, ClickEvent, FigureId, FigureRepr};
 use color::Color;
 use artist::Artist;
 
@@ -17,6 +17,7 @@ pub struct FigureAttributes {
     pub dpi: f64,
     pub title: Option<String>,
     pub facecolor: Color,
+    pub click_event_handlers: Vec<Box<FnMut(ClickEvent, &mut Figure)>>,
 }
 
 impl FigureBuilder {
@@ -48,6 +49,14 @@ impl FigureBuilder {
         self
     }
 
+    pub fn with_onclick<F>(mut self, f: F) -> Self
+    where
+        F: 'static + FnMut(ClickEvent, &mut Figure),
+    {
+        self.f.f.click_event_handlers.push(Box::new(f));
+        self
+    }
+
     pub fn build(self) -> Figure {
         self.f
     }
@@ -70,8 +79,19 @@ impl Figure {
         self.f.figsize = (width.into(), height.into());
     }
 
+    pub fn set_facecolor<T: Into<Color>>(&mut self, color: T) {
+        self.f.facecolor = color.into();
+    }
+
     pub fn create(&self, be: &mut Backend) -> Result<FigureId, <Backend as BackendTrait>::Err> {
         Ok(be.new_figure(&self.backend_representation())?)
+    }
+
+    pub fn onclick<F>(&mut self, f: F)
+    where
+        F: 'static + FnMut(ClickEvent, &mut Figure),
+    {
+        self.f.click_event_handlers.push(Box::new(f));
     }
 
     pub fn render(
@@ -116,6 +136,7 @@ impl Default for FigureAttributes {
             dpi: 100.0,
             title: None,
             facecolor: Color::rgb(255.0, 255.0, 255.0),
+            click_event_handlers: Vec::new(),
         }
     }
 }

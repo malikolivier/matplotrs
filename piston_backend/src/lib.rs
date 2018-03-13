@@ -7,6 +7,8 @@ extern crate texture;
 extern crate piston;
 extern crate image;
 
+mod events;
+
 use piston::window::WindowSettings;
 use piston::event_loop::*;
 use piston::input::*;
@@ -171,7 +173,7 @@ impl matplotrs_backend::Backend for PistonBackend {
                 let (event, fig_id) = {
                     let next_figure = &mut self.figures[self.figure_idx];
                     self.figure_idx += 1;
-                    (self.events.next(&mut next_figure.w).and_then(convert_events), next_figure.id)
+                    (self.events.next(&mut next_figure.w).and_then(events::convert_events), next_figure.id)
                 };
                 event.map(|e| {
                     if let matplotrs_backend::EventKind::Close = e {
@@ -219,28 +221,6 @@ fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
         rect: [0, 0, width_px as i32, height_px as i32],
         draw_size: [width_px as u32, height_px as u32],
         window_size: [width_px as u32, height_px as u32],
-    }
-}
-
-fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
-    use matplotrs_backend::EventKind;
-    match event {
-        Event::Input(input) => match input {
-            Input::Button(_args) => None, /* TODO Ignore for now! */
-            Input::Move(_motion) => None, /* TODO Ignore for now! */
-            Input::Text(_) => None, /* TODO Ignore for now! */
-            Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
-            Input::Focus(_focus) => None,
-            Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
-            Input::Close(_) => Some(EventKind::Close),
-        },
-        Event::Loop(lp) => match lp {
-            Loop::Render(_args) => Some(EventKind::Render),
-            Loop::AfterRender(_args) => None,
-            Loop::Update(args) => Some(EventKind::Update(args.dt)),
-            Loop::Idle(_args) => None,
-        }
-        _ => unimplemented!(),
     }
 }
 

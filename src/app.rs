@@ -45,6 +45,7 @@ impl App {
                     fig.set_figsize(w, h);
                 })?,
                 EventKind::Close => (), /* NOOP for the time being */
+                EventKind::Click(e) => (),
             };
         }
         Ok(0)

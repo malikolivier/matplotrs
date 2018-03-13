@@ -72,5 +72,25 @@ pub enum EventKind {
     /// Emitted when a window has been resized to size the following (width, height) in pixels
     Resize(u32, u32),
     /// A window is closed
-    Close
+    Close,
+    Click(ClickEvent),
+}
+
+#[derive(Debug)]
+pub struct ClickEvent {
+    pub state: ButtonState,
+    pub button: MouseButton,
+}
+
+#[derive(Debug)]
+pub enum ButtonState {
+    Press,
+    Release,
+}
+
+#[derive(Debug)]
+pub enum MouseButton {
+    Left,
+    Right,
+    Middle,
 }
