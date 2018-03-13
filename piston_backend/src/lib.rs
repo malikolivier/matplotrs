@@ -3,13 +3,15 @@ extern crate matplotrs_backend;
 extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
+extern crate texture;
 extern crate piston;
+extern crate image;
 
 use piston::window::WindowSettings;
 use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, OpenGL};
+use opengl_graphics::{GlGraphics, OpenGL, Texture};
 use graphics::Viewport;
 
 pub struct PistonBackend {
@@ -131,7 +133,24 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(())
     }
 
-    fn draw_image(&mut self, _: matplotrs_backend::FigureId, _: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+    fn draw_image(&mut self, fig_id: matplotrs_backend::FigureId, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
+        let (fig_width, fig_height) = fig.cached_size;
+        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let (disp_width, disp_height) = image.size;
+        let (disp_x, disp_y) = image.position;
+        let (pix_w, pix_h) = (image.width as f64, image.height as f64);
+        let scale_x = (disp_width / 2.0 * fig_width) / pix_w;
+        let scale_y = (disp_height / 2.0 * fig_height) / pix_h;
+        let dx = (1.0 + disp_x) * fig_width / 2.0;
+        let dy = (1.0 + disp_y - disp_height) * fig_height / 2.0;
+        fig.gl.draw(view_port, |c, gl| {
+            use graphics::Transformed;
+            let transform = c.transform.trans(dx, dy).scale(scale_x, scale_y);
+            let image = to_gl_imagebuffer(image);
+            let my_texture = Texture::from_image(&image, &texture::TextureSettings::new());
+            graphics::image(&my_texture, transform, gl);
+        });
         Ok(())
     }
 
@@ -172,6 +191,20 @@ impl<'a> From<&'a str> for PistonError {
     fn from(err: &str) -> Self {
         PistonError::BackEndError(err.to_owned())
     }
+}
+
+fn to_gl_imagebuffer(img: &matplotrs_backend::Image) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
+    let mut data = Vec::with_capacity(img.width * img.height * 4);
+    let mut i: usize = 0;
+    for p in img.data.iter() {
+        data.push(*p);
+        // Add alpha channel
+        if (i % 3) == 2 {
+            data.push(255);
+        }
+        i += 1;
+    }
+    image::ImageBuffer::from_raw(img.width as u32, img.height as u32, data).expect("Convert image")
 }
 
 fn to_webgl_color((r, g, b, a): (f64, f64, f64, f64)) -> [f32; 4] {
