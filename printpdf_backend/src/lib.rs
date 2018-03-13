@@ -198,6 +198,18 @@ impl From<printpdf::PrintpdfError> for PdfError {
     }
 }
 
+impl<'a> From<&'a str> for PdfError {
+    fn from(err: &str) -> Self {
+        PdfError::BackEndError(err.to_owned())
+    }
+}
+
+impl From<String> for PdfError {
+    fn from(err: String) -> Self {
+        PdfError::BackEndError(err)
+    }
+}
+
 /// Trait used to add a few helper methods doing measurement on an Image instance
 trait MeasureImage {
     fn width(&self, dpi: f64) -> Mm;
