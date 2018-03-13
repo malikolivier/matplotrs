@@ -37,7 +37,6 @@ pub enum PistonError {
 
 // Change this to OpenGL::V2_1 if not working.
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
-const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
 impl matplotrs_backend::Backend for PistonBackend {
     type Err = PistonError;
@@ -97,16 +96,18 @@ impl matplotrs_backend::Backend for PistonBackend {
         let view_port = to_webgl_viewport((fig_width, fig_height));
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         gl.draw(view_port, |c, gl| {
-            let line_color = path.line_color.map(to_webgl_color).unwrap_or(BLACK);
             // This transformation puts origin at the center of the viewport and
             // scale the axes so that all values between coordinates -1 and 1
             // are the edge of the screen.
             let transform = c.transform.trans(x, y).scale(x, y);
-            let p1_iter = path.points.iter();
-            let p2_iter = path.points.iter().skip(1);
-            for (p1, p2) in p1_iter.zip(p2_iter) {
-                line(line_color, 0.002, [p1.0, p1.1, p2.0, p2.1], transform, gl);
-            }
+            // Do not draw line if no color is provided
+            path.line_color.map(to_webgl_color).map(|line_color| {
+                let p1_iter = path.points.iter();
+                let p2_iter = path.points.iter().skip(1);
+                for (p1, p2) in p1_iter.zip(p2_iter) {
+                    line(line_color, 0.002, [p1.0, p1.1, p2.0, p2.1], transform, gl);
+                }
+            });
         });
         Ok(())
     }
