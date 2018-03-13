@@ -3,7 +3,7 @@ extern crate matplotrs;
 use matplotrs::app::App;
 use matplotrs::figure::FigureBuilder;
 use matplotrs::axes::AxesBuilder;
-use matplotrs::color::{RED, YELLOW};
+use matplotrs::color::{RED, WHITE, YELLOW};
 use matplotrs::line::Line;
 use matplotrs::line_collection::LineCollectionBuilder;
 use matplotrs::plot::PlotBuilder;
@@ -11,7 +11,10 @@ use matplotrs::plot::PlotBuilder;
 fn main() {
     let mut app = App::new();
     let mut fig = FigureBuilder::new().with_facecolor(YELLOW).build();
-    let mut axes = AxesBuilder::new().with_edgecolor(RED).build();
+    let mut axes = AxesBuilder::new()
+        .with_edgecolor(RED)
+        .with_facecolor(WHITE)
+        .build();
     axes.add_child(Line::new((0.0, 0.0), (0.5, 0.5)));
     let linecol = LineCollectionBuilder::new()
         .with_vertices(vec![
