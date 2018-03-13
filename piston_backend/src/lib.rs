@@ -101,6 +101,13 @@ impl matplotrs_backend::Backend for PistonBackend {
             // scale the axes so that all values between coordinates -1 and 1
             // are the edge of the screen.
             let transform = c.transform.trans(x, y).scale(x, y);
+            // Do not draw filled polygon if no fill_collr is provided
+            path.fill_color.map(to_webgl_color).map(|fill_color| {
+                // Transform tuples to 2-elem arrays
+                // (TODO: Maybe we should use arrays to begin with to avoid this transformation...)
+                let poly: Vec<_> = path.points.iter().map(|&(x, y)| [x, y]).collect();
+                polygon(fill_color, poly.as_slice(), transform, gl);
+            });
             // Do not draw line if no color is provided
             path.line_color.map(to_webgl_color).map(|line_color| {
                 // Draw a collection of lines
