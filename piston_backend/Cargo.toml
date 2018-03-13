@@ -6,8 +6,9 @@ authors = ["Malik Olivier Boussejra <malik@boussejra.com>"]
 [dependencies]
 matplotrs_backend = { path = "../backend" }
 piston = "0.36.0"
-piston2d-graphics = "0.26.0"
+piston2d-graphics = { version = "0.26.0", features = ["glyph_cache_rusttype"]}
 pistoncore-glutin_window = "0.45.0"
 piston2d-opengl_graphics = "0.52.0"
 piston-texture = "0.6.0"
+rusttype = "0.4"
 image = "0.18.0"

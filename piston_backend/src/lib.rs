@@ -140,7 +140,16 @@ impl matplotrs_backend::Backend for PistonBackend {
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         fig.gl.draw(view_port, |c, gl| {
             let transform = c.transform.trans(x, y).scale(x, y);
-            text(BLACK, text_to_draw.font_size as u32, text_to_draw.text.as_str(), cache, transform, gl);
+
+            use graphics::glyph_cache::rusttype::GlyphCache;
+            extern crate texture;
+            extern crate rusttype;
+            let font_data = include_bytes!("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+            let font = rusttype::FontCollection::from_bytes(font_data as &[u8]).into_font().expect("Could open font");
+            let factory = 1/*???? Add factory to create textures*/;
+            let cache = GlyphCache::from_font(font, factory, texture::TextureSettings::new());
+
+            text(BLACK, text_to_draw.font_size as u32, text_to_draw.text.as_str(), &mut cache, transform, gl);
         });
         Ok(())
     }
@@ -234,6 +243,28 @@ fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
     }
 }
 
+fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
+    use matplotrs_backend::EventKind;
+    match event {
+        Event::Input(input) => match input {
+            Input::Button(_args) => None, /* TODO Ignore for now! */
+            Input::Move(_motion) => None, /* TODO Ignore for now! */
+            Input::Text(_) => None, /* TODO Ignore for now! */
+            Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
+            Input::Focus(_focus) => None,
+            Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
+            Input::Close(_) => None, /* TODO Ignore for now! */
+        },
+        Event::Loop(lp) => match lp {
+            Loop::Render(_args) => Some(EventKind::Render),
+            Loop::AfterRender(_args) => None,
+            Loop::Update(args) => Some(EventKind::Update(args.dt)),
+            Loop::Idle(_args) => None,
+        }
+        _ => unimplemented!(),
+    }
+}
+
 impl PistonBackend {
     fn figure_by_id(&mut self, fig_id: matplotrs_backend::FigureId) -> Option<&mut Figure> {
         for fig in self.figures.iter_mut() {
@@ -242,6 +273,11 @@ impl PistonBackend {
             }
         }
         None
+    }
+
+    fn gl_context_by_fig_id(&mut self, fig_id: matplotrs_backend::FigureId) -> Result<&mut GlGraphics, PistonError> {
+        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
+        Ok(&mut fig.gl)
     }
 
     fn remove_figure(&mut self, fig_id: matplotrs_backend::FigureId) {
