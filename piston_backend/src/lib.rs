@@ -77,7 +77,7 @@ impl matplotrs_backend::Backend for PistonBackend {
 
     /// Clear figure: Set background color and window name (TODO)
     fn clear_figure(&mut self, fig_id: matplotrs_backend::FigureId, figure: &matplotrs_backend::FigureRepr) -> Result<(), Self::Err> {
-        let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
+        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
         let color = to_webgl_color(figure.facecolor);
         fig.cached_size = figure.size;
@@ -91,7 +91,7 @@ impl matplotrs_backend::Backend for PistonBackend {
     /// Draw path to using OpenGL drawing backend. TODO: Support for fill_color
     fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         use graphics::*;
-        let fig = self.figure_by_id(fig_id).ok_or("Find figure")?;
+        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_webgl_viewport((fig_width, fig_height));
@@ -218,3 +218,5 @@ impl PistonBackend {
         None
     }
 }
+
+const FIGURE_NOT_FOUND_ERR: &str = "Did not find figure";
