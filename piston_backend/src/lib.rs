@@ -88,7 +88,7 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(())
     }
 
-    /// Draw path to using OpenGL drawing backend. TODO: Support for fill_color
+    /// Draw path to using OpenGL drawing backend.
     fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
