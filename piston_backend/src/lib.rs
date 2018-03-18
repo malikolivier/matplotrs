@@ -37,6 +37,7 @@ struct Figure {
 #[derive(Debug)]
 pub enum PistonError {
     BackEndError(String),
+    IOError(std::io::Error),
 }
 
 // Change this to OpenGL::V2_1 if not working.
@@ -208,6 +209,12 @@ impl From<String> for PistonError {
 impl<'a> From<&'a str> for PistonError {
     fn from(err: &str) -> Self {
         PistonError::BackEndError(err.to_owned())
+    }
+}
+
+impl From<std::io::Error> for PistonError {
+    fn from(err: std::io::Error) -> Self {
+        PistonError::IOError(err)
     }
 }
 
