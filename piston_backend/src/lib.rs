@@ -98,9 +98,9 @@ impl mb::Backend for PistonBackend {
     ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
-        let color = to_webgl_color(figure.facecolor);
+        let color = to_gl_color(figure.facecolor);
         fig.cached_size = figure.size;
-        gl.draw(to_webgl_viewport((1.0, 1.0)), |_, gl| {
+        gl.draw(to_gl_viewport((1.0, 1.0)), |_, gl| {
             use graphics::clear;
             clear(color, gl);
         });
@@ -117,7 +117,7 @@ impl mb::Backend for PistonBackend {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
         let (fig_width, fig_height) = fig.cached_size;
-        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let view_port = to_gl_viewport((fig_width, fig_height));
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         gl.draw(view_port, |c, gl| {
             // This transformation puts origin at the center of the viewport and
@@ -125,14 +125,14 @@ impl mb::Backend for PistonBackend {
             // are the edge of the screen.
             let transform = c.transform.trans(x, y).scale(x, y);
             // Do not draw filled polygon if no fill_collr is provided
-            path.fill_color.map(to_webgl_color).map(|fill_color| {
+            path.fill_color.map(to_gl_color).map(|fill_color| {
                 // Transform tuples to 2-elem arrays
                 // (TODO: Maybe we should use arrays to begin with to avoid this transformation...)
                 let poly: Vec<_> = path.points.iter().map(|&(x, y)| [x, y]).collect();
                 polygon(fill_color, poly.as_slice(), transform, gl);
             });
             // Do not draw line if no color is provided
-            path.line_color.map(to_webgl_color).map(|line_color| {
+            path.line_color.map(to_gl_color).map(|line_color| {
                 // Draw a collection of lines
                 let p1_iter = path.points.iter();
                 let p2_iter = path.points.iter().skip(1);
@@ -157,7 +157,7 @@ impl mb::Backend for PistonBackend {
     ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
-        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let view_port = to_gl_viewport((fig_width, fig_height));
         let (x, y) = (
             fig_width / 2.0 * (1.0 + text_to_draw.point.0),
             fig_height / 2.0 * (1.0 + text_to_draw.point.1),
@@ -186,7 +186,7 @@ impl mb::Backend for PistonBackend {
     ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
-        let view_port = to_webgl_viewport((fig_width, fig_height));
+        let view_port = to_gl_viewport((fig_width, fig_height));
         let (disp_width, disp_height) = image.size;
         let (disp_x, disp_y) = image.position;
         let (pix_w, pix_h) = (image.width as f64, image.height as f64);
@@ -275,11 +275,11 @@ fn to_gl_imagebuffer(
     image::ImageBuffer::from_raw(img.width as u32, img.height as u32, data).expect("Convert image")
 }
 
-fn to_webgl_color((r, g, b, a): (f64, f64, f64, f64)) -> [f32; 4] {
+fn to_gl_color((r, g, b, a): (f64, f64, f64, f64)) -> [f32; 4] {
     [r as f32, g as f32, b as f32, a as f32]
 }
 
-fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
+fn to_gl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
     Viewport {
         rect: [0, 0, width_px as i32, height_px as i32],
         draw_size: [width_px as u32, height_px as u32],
