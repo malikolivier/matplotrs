@@ -1,11 +1,11 @@
-extern crate matplotrs_backend;
+extern crate matplotrs_backend as mb;
 
 extern crate glutin_window;
 extern crate graphics;
-extern crate opengl_graphics;
-extern crate texture;
-extern crate piston;
 extern crate image;
+extern crate opengl_graphics;
+extern crate piston;
+extern crate texture;
 
 mod events;
 
@@ -21,13 +21,13 @@ pub struct PistonBackend {
     events: Events,
     figure_idx: usize,
     /// Stored events that should be run next are in this vector
-    event_stack: Vec<matplotrs_backend::Event>,
+    event_stack: Vec<mb::Event>,
     figure_id_count: usize,
 }
 
 struct Figure {
     w: Window,
-    id: matplotrs_backend::FigureId,
+    id: mb::FigureId,
     /// OpenGL drawing backend
     gl: GlGraphics,
     glyph_cache: GlyphCache<'static>,
@@ -45,7 +45,7 @@ pub enum PistonError {
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
-impl matplotrs_backend::Backend for PistonBackend {
+impl mb::Backend for PistonBackend {
     type Err = PistonError;
     fn new() -> Self {
         PistonBackend {
@@ -57,9 +57,12 @@ impl matplotrs_backend::Backend for PistonBackend {
         }
     }
 
-    fn new_figure(&mut self, figure: &matplotrs_backend::FigureRepr) -> Result<matplotrs_backend::FigureId, Self::Err> {
+    fn new_figure(
+        &mut self,
+        figure: &mb::FigureRepr,
+    ) -> Result<mb::FigureId, Self::Err> {
         if self.figures.len() > 0 {
-            return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()))
+            return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()));
         }
         let (x, y) = figure.size;
         let window = WindowSettings::new(
@@ -71,7 +74,7 @@ impl matplotrs_backend::Backend for PistonBackend {
             .srgb(false)
             .exit_on_esc(true)
             .build()?;
-        let id = matplotrs_backend::FigureId(self.figure_id_count);
+        let id = mb::FigureId(self.figure_id_count);
         self.figures.push(Figure {
             w: window,
             id,
@@ -88,7 +91,11 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     /// Clear figure: Set background color and window name (TODO)
-    fn clear_figure(&mut self, fig_id: matplotrs_backend::FigureId, figure: &matplotrs_backend::FigureRepr) -> Result<(), Self::Err> {
+    fn clear_figure(
+        &mut self,
+        fig_id: mb::FigureId,
+        figure: &mb::FigureRepr,
+    ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
         let color = to_webgl_color(figure.facecolor);
@@ -101,7 +108,11 @@ impl matplotrs_backend::Backend for PistonBackend {
     }
 
     /// Draw path to using OpenGL drawing backend.
-    fn draw_path(&mut self, fig_id: matplotrs_backend::FigureId, path: &matplotrs_backend::Path) -> Result<(), Self::Err> {
+    fn draw_path(
+        &mut self,
+        fig_id: mb::FigureId,
+        path: &mb::Path,
+    ) -> Result<(), Self::Err> {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
@@ -139,8 +150,11 @@ impl matplotrs_backend::Backend for PistonBackend {
         Ok(())
     }
 
-    fn draw_text(&mut self, fig_id: matplotrs_backend::FigureId, text_to_draw: &matplotrs_backend::Text) -> Result<(), Self::Err> {
-        use graphics::*;
+    fn draw_text(
+        &mut self,
+        fig_id: mb::FigureId,
+        text_to_draw: &mb::Text,
+    ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_webgl_viewport((fig_width, fig_height));
@@ -165,7 +179,11 @@ impl matplotrs_backend::Backend for PistonBackend {
             .map_err(|e| e.into())
     }
 
-    fn draw_image(&mut self, fig_id: matplotrs_backend::FigureId, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
+    fn draw_image(
+        &mut self,
+        fig_id: mb::FigureId,
+        image: &mb::Image,
+    ) -> Result<(), Self::Err> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_webgl_viewport((fig_width, fig_height));
@@ -190,7 +208,7 @@ impl matplotrs_backend::Backend for PistonBackend {
         unimplemented!()
     }
 
-    fn next_event(&mut self) -> Option<matplotrs_backend::Event> {
+    fn next_event(&mut self) -> Option<mb::Event> {
         self.event_stack.pop().or_else(|| {
             let len = self.figures.len();
             if len == 0 {
@@ -203,15 +221,22 @@ impl matplotrs_backend::Backend for PistonBackend {
                 let (event, fig_id) = {
                     let next_figure = &mut self.figures[self.figure_idx];
                     self.figure_idx += 1;
-                    (self.events.next(&mut next_figure.w).and_then(events::convert_events), next_figure.id)
+                    (
+                        self.events
+                            .next(&mut next_figure.w)
+                            .and_then(events::convert_events),
+                        next_figure.id,
+                    )
                 };
-                event.map(|e| {
-                    if let matplotrs_backend::EventKind::Close = e {
-                        // A figure has been closed. We must remove it from the figure list.
-                        self.remove_figure(fig_id);
-                    }
-                    matplotrs_backend::Event { e, fig_id }
-                }).or_else(|| self.next_event())
+                event
+                    .map(|e| {
+                        if let mb::EventKind::Close = e {
+                            // A figure has been closed. We must remove it from the figure list.
+                            self.remove_figure(fig_id);
+                        }
+                        mb::Event { e, fig_id }
+                    })
+                    .or_else(|| self.next_event())
             }
         })
     }
@@ -234,7 +259,9 @@ impl From<std::io::Error> for PistonError {
     }
 }
 
-fn to_gl_imagebuffer(img: &matplotrs_backend::Image) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
+fn to_gl_imagebuffer(
+    img: &mb::Image,
+) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
     let mut data = Vec::with_capacity(img.width * img.height * 4);
     let mut i: usize = 0;
     for p in img.data.iter() {
@@ -260,30 +287,30 @@ fn to_webgl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
     }
 }
 
-fn convert_events(event: Event) -> Option<matplotrs_backend::EventKind> {
-    use matplotrs_backend::EventKind;
+fn convert_events(event: Event) -> Option<mb::EventKind> {
+    use mb::EventKind;
     match event {
         Event::Input(input) => match input {
             Input::Button(_args) => None, /* TODO Ignore for now! */
             Input::Move(_motion) => None, /* TODO Ignore for now! */
-            Input::Text(_) => None, /* TODO Ignore for now! */
+            Input::Text(_) => None,       /* TODO Ignore for now! */
             Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
             Input::Focus(_focus) => None,
             Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
-            Input::Close(_) => None, /* TODO Ignore for now! */
+            Input::Close(_) => None,        /* TODO Ignore for now! */
         },
         Event::Loop(lp) => match lp {
             Loop::Render(_args) => Some(EventKind::Render),
             Loop::AfterRender(_args) => None,
             Loop::Update(args) => Some(EventKind::Update(args.dt)),
             Loop::Idle(_args) => None,
-        }
+        },
         _ => unimplemented!(),
     }
 }
 
 impl PistonBackend {
-    fn figure_by_id(&mut self, fig_id: matplotrs_backend::FigureId) -> Option<&mut Figure> {
+    fn figure_by_id(&mut self, fig_id: mb::FigureId) -> Option<&mut Figure> {
         for fig in self.figures.iter_mut() {
             if fig.id == fig_id {
                 return Some(fig);
@@ -292,12 +319,15 @@ impl PistonBackend {
         None
     }
 
-    fn gl_context_by_fig_id(&mut self, fig_id: matplotrs_backend::FigureId) -> Result<&mut GlGraphics, PistonError> {
+    fn gl_context_by_fig_id(
+        &mut self,
+        fig_id: mb::FigureId,
+    ) -> Result<&mut GlGraphics, PistonError> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         Ok(&mut fig.gl)
     }
 
-    fn remove_figure(&mut self, fig_id: matplotrs_backend::FigureId) {
+    fn remove_figure(&mut self, fig_id: mb::FigureId) {
         self.figures.retain(|fig| fig.id != fig_id);
     }
 }

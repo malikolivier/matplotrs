@@ -1,12 +1,12 @@
 use piston::input::*;
 
-use matplotrs_backend as mb;
+use mb;
 use self::mb::EventKind;
 
 fn convert_button_state(state: ButtonState) -> mb::ButtonState {
     match state {
-        ButtonState:: Press => mb::ButtonState::Press,
-        ButtonState:: Release => mb::ButtonState::Release,
+        ButtonState::Press => mb::ButtonState::Press,
+        ButtonState::Release => mb::ButtonState::Release,
     }
 }
 
@@ -32,9 +32,9 @@ pub fn convert_events(event: Event) -> Option<EventKind> {
                     _ => None,
                 },
                 Button::Controller(_) => None,
-            }
+            },
             Input::Move(_motion) => None, /* TODO Ignore for now! */
-            Input::Text(_) => None, /* TODO Ignore for now! */
+            Input::Text(_) => None,       /* TODO Ignore for now! */
             Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
             Input::Focus(_focus) => None,
             Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
@@ -45,7 +45,7 @@ pub fn convert_events(event: Event) -> Option<EventKind> {
             Loop::AfterRender(_args) => None,
             Loop::Update(args) => Some(EventKind::Update(args.dt)),
             Loop::Idle(_args) => None,
-        }
+        },
         _ => unimplemented!(),
     }
 }
