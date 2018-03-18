@@ -109,6 +109,8 @@ impl matplotrs_backend::Backend for PrintPdfBackend {
             (_, None) => Err(PdfError::BackEndError("No font!".to_owned())),
             (Some(layer), Some(font)) => {
                 let (x_pdf, y_pdf) = self.transform(&fig_id, &text.point);
+                let black_color = printpdf::Color::Rgb(printpdf::Rgb::new(0.0, 0.0, 0.0, None));
+                layer.set_fill_color(black_color);
                 layer.begin_text_section();
                 layer.set_font(&font, text.font_size as i64);
                 layer.set_text_cursor(x_pdf, y_pdf);
