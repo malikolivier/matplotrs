@@ -11,7 +11,6 @@ mod events;
 
 use piston::window::WindowSettings;
 use piston::event_loop::*;
-use piston::input::*;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, GlyphCache, OpenGL, Texture, TextureSettings};
 use graphics::Viewport;
@@ -45,6 +44,8 @@ pub enum PistonError {
 const OPENGL_VERSION: OpenGL = OpenGL::V3_2;
 const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
+type BackendResult<T> = Result<T, <PistonBackend as mb::Backend>::Err>;
+
 impl mb::Backend for PistonBackend {
     type Err = PistonError;
     fn new() -> Self {
@@ -57,10 +58,7 @@ impl mb::Backend for PistonBackend {
         }
     }
 
-    fn new_figure(
-        &mut self,
-        figure: &mb::FigureRepr,
-    ) -> Result<mb::FigureId, Self::Err> {
+    fn new_figure(&mut self, figure: &mb::FigureRepr) -> BackendResult<mb::FigureId> {
         if self.figures.len() > 0 {
             return Err(From::from("Only one figure is currently supported on piston backend! See https://github.com/PistonDevelopers/piston-examples/issues/401".to_owned()));
         }
@@ -91,11 +89,7 @@ impl mb::Backend for PistonBackend {
     }
 
     /// Clear figure: Set background color and window name (TODO)
-    fn clear_figure(
-        &mut self,
-        fig_id: mb::FigureId,
-        figure: &mb::FigureRepr,
-    ) -> Result<(), Self::Err> {
+    fn clear_figure(&mut self, fig_id: mb::FigureId, figure: &mb::FigureRepr) -> BackendResult<()> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
         let color = to_gl_color(figure.facecolor);
@@ -108,11 +102,7 @@ impl mb::Backend for PistonBackend {
     }
 
     /// Draw path to using OpenGL drawing backend.
-    fn draw_path(
-        &mut self,
-        fig_id: mb::FigureId,
-        path: &mb::Path,
-    ) -> Result<(), Self::Err> {
+    fn draw_path(&mut self, fig_id: mb::FigureId, path: &mb::Path) -> BackendResult<()> {
         use graphics::*;
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let gl = &mut fig.gl;
@@ -150,11 +140,7 @@ impl mb::Backend for PistonBackend {
         Ok(())
     }
 
-    fn draw_text(
-        &mut self,
-        fig_id: mb::FigureId,
-        text_to_draw: &mb::Text,
-    ) -> Result<(), Self::Err> {
+    fn draw_text(&mut self, fig_id: mb::FigureId, text_to_draw: &mb::Text) -> BackendResult<()> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_gl_viewport((fig_width, fig_height));
@@ -179,11 +165,7 @@ impl mb::Backend for PistonBackend {
             .map_err(|e| e.into())
     }
 
-    fn draw_image(
-        &mut self,
-        fig_id: mb::FigureId,
-        image: &mb::Image,
-    ) -> Result<(), Self::Err> {
+    fn draw_image(&mut self, fig_id: mb::FigureId, image: &mb::Image) -> BackendResult<()> {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_gl_viewport((fig_width, fig_height));
@@ -204,7 +186,7 @@ impl mb::Backend for PistonBackend {
         Ok(())
     }
 
-    fn save_to_file(&mut self) -> Result<(), Self::Err> {
+    fn save_to_file(&mut self) -> BackendResult<()> {
         unimplemented!()
     }
 
@@ -259,9 +241,7 @@ impl From<std::io::Error> for PistonError {
     }
 }
 
-fn to_gl_imagebuffer(
-    img: &mb::Image,
-) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
+fn to_gl_imagebuffer(img: &mb::Image) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
     let mut data = Vec::with_capacity(img.width * img.height * 4);
     let mut i: usize = 0;
     for p in img.data.iter() {
@@ -287,28 +267,6 @@ fn to_gl_viewport((width_px, height_px): (f64, f64)) -> Viewport {
     }
 }
 
-fn convert_events(event: Event) -> Option<mb::EventKind> {
-    use mb::EventKind;
-    match event {
-        Event::Input(input) => match input {
-            Input::Button(_args) => None, /* TODO Ignore for now! */
-            Input::Move(_motion) => None, /* TODO Ignore for now! */
-            Input::Text(_) => None,       /* TODO Ignore for now! */
-            Input::Resize(w, h) => Some(EventKind::Resize(w, h)),
-            Input::Focus(_focus) => None,
-            Input::Cursor(_cursor) => None, /* TODO Ignore for now! */
-            Input::Close(_) => None,        /* TODO Ignore for now! */
-        },
-        Event::Loop(lp) => match lp {
-            Loop::Render(_args) => Some(EventKind::Render),
-            Loop::AfterRender(_args) => None,
-            Loop::Update(args) => Some(EventKind::Update(args.dt)),
-            Loop::Idle(_args) => None,
-        },
-        _ => unimplemented!(),
-    }
-}
-
 impl PistonBackend {
     fn figure_by_id(&mut self, fig_id: mb::FigureId) -> Option<&mut Figure> {
         for fig in self.figures.iter_mut() {
@@ -317,14 +275,6 @@ impl PistonBackend {
             }
         }
         None
-    }
-
-    fn gl_context_by_fig_id(
-        &mut self,
-        fig_id: mb::FigureId,
-    ) -> Result<&mut GlGraphics, PistonError> {
-        let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
-        Ok(&mut fig.gl)
     }
 
     fn remove_figure(&mut self, fig_id: mb::FigureId) {
