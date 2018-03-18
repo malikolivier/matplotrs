@@ -44,8 +44,8 @@ impl App {
                 EventKind::Resize(w, h) => self.map_on_figure_by_id(event.fig_id, |fig| {
                     fig.set_figsize(w, h);
                 })?,
-                EventKind::Close => (), /* NOOP for the time being */
-                EventKind::Click(e) => (),
+                EventKind::Close => (),     /* NOOP for the time being */
+                EventKind::Click(_e) => (), /* NOOP for the time being */
             };
         }
         Ok(0)

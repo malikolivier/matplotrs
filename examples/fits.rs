@@ -1,4 +1,4 @@
-extern crate fits;
+extern crate fitrs;
 extern crate matplotrs;
 
 use matplotrs::app::App;
@@ -11,11 +11,12 @@ fn main() {
     let mut app = App::new();
     let mut fig = Figure::new();
     let mut axes = AxesBuilder::new().with_edgecolor(BROWN).build();
-    let mut fits_file = fits::Fits::open("/home/malik/workspace/lab/aflak/data/test.fits").unwrap();
+    let mut fits_file =
+        fitrs::Fits::open("/home/malik/workspace/lab/aflak/data/test.fits").unwrap();
     let primary_hdu = &mut fits_file[0];
     let data = primary_hdu.read_data();
     let (shape, image) = match data {
-        &fits::FitsData::FloatingPoint32(ref image) => ((image.shape[0], image.shape[1]), {
+        &fitrs::FitsData::FloatingPoint32(ref image) => ((image.shape[0], image.shape[1]), {
             let len = image.shape[0] * image.shape[1];
             let nth_frame = 100;
             let start = len * nth_frame;

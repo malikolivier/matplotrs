@@ -17,4 +17,4 @@ gfx = ["matplotrs_gfx_backend"]
 [dev-dependencies]
 rustfmt-nightly = "0.3.6"
 # Used for some examples
-fitrs = { path = "../fitrs" }
+fitrs = { git = "https://github.com/malikolivier/fitrs" }
