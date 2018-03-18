@@ -13,7 +13,7 @@ use piston::window::WindowSettings;
 use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, OpenGL, Texture};
+use opengl_graphics::{GlGraphics, GlyphCache, OpenGL, Texture, TextureSettings};
 use graphics::Viewport;
 
 pub struct PistonBackend {
@@ -30,6 +30,7 @@ struct Figure {
     id: matplotrs_backend::FigureId,
     /// OpenGL drawing backend
     gl: GlGraphics,
+    glyph_cache: GlyphCache<'static>,
     /// Figure size cached in pixel (w, h)
     cached_size: (f64, f64),
 }
@@ -75,6 +76,11 @@ impl matplotrs_backend::Backend for PistonBackend {
             w: window,
             id,
             gl: GlGraphics::new(OPENGL_VERSION),
+            glyph_cache: GlyphCache::new(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                (),
+                TextureSettings::new(),
+            )?,
             cached_size: figure.size,
         });
         self.figure_id_count += 1;
@@ -138,15 +144,25 @@ impl matplotrs_backend::Backend for PistonBackend {
         let fig = self.figure_by_id(fig_id).ok_or(FIGURE_NOT_FOUND_ERR)?;
         let (fig_width, fig_height) = fig.cached_size;
         let view_port = to_webgl_viewport((fig_width, fig_height));
-        let (x, y) = (fig_width / 2.0, fig_height / 2.0);
-        fig.gl.draw(view_port, |c, gl| {
-            let transform = c.transform.trans(x, y).trans(x * text_to_draw.point.0, y * text_to_draw.point.1);
-
-            use opengl_graphics::{GlyphCache, TextureSettings};
-            let mut glyph_cache = GlyphCache::new("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", (), TextureSettings::new()).unwrap();
-
-            text(BLACK, 2 * text_to_draw.font_size as u32, text_to_draw.text.as_str(), &mut glyph_cache, transform, gl)
-        }).map_err(|e| e.into())
+        let (x, y) = (
+            fig_width / 2.0 * (1.0 + text_to_draw.point.0),
+            fig_height / 2.0 * (1.0 + text_to_draw.point.1),
+        );
+        let cache = &mut fig.glyph_cache;
+        fig.gl
+            .draw(view_port, |c, gl| {
+                use graphics::Transformed;
+                let transform = c.transform.trans(x, y);
+                graphics::text(
+                    BLACK,
+                    text_to_draw.font_size as u32,
+                    text_to_draw.text.as_str(),
+                    cache,
+                    transform,
+                    gl,
+                )
+            })
+            .map_err(|e| e.into())
     }
 
     fn draw_image(&mut self, fig_id: matplotrs_backend::FigureId, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
