@@ -139,19 +139,13 @@ impl matplotrs_backend::Backend for PistonBackend {
         let view_port = to_webgl_viewport((fig_width, fig_height));
         let (x, y) = (fig_width / 2.0, fig_height / 2.0);
         fig.gl.draw(view_port, |c, gl| {
-            let transform = c.transform.trans(x, y).scale(x, y);
+            let transform = c.transform.trans(x, y).trans(x * text_to_draw.point.0, y * text_to_draw.point.1);
 
-            use graphics::glyph_cache::rusttype::GlyphCache;
-            extern crate texture;
-            extern crate rusttype;
-            let font_data = include_bytes!("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
-            let font = rusttype::FontCollection::from_bytes(font_data as &[u8]).into_font().expect("Could open font");
-            let factory = 1/*???? Add factory to create textures*/;
-            let cache = GlyphCache::from_font(font, factory, texture::TextureSettings::new());
+            use opengl_graphics::{GlyphCache, TextureSettings};
+            let mut glyph_cache = GlyphCache::new("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", (), TextureSettings::new()).unwrap();
 
-            text(BLACK, text_to_draw.font_size as u32, text_to_draw.text.as_str(), &mut cache, transform, gl);
-        });
-        Ok(())
+            text(BLACK, 2 * text_to_draw.font_size as u32, text_to_draw.text.as_str(), &mut glyph_cache, transform, gl)
+        }).map_err(|e| e.into())
     }
 
     fn draw_image(&mut self, fig_id: matplotrs_backend::FigureId, image: &matplotrs_backend::Image) -> Result<(), Self::Err> {
