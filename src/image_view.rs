@@ -130,7 +130,7 @@ impl Default for ImageViewAttributes {
 }
 
 impl ImageView {
-    fn raw_rgb(&self) -> Vec<u8> {
+    pub fn raw_rgb(&self) -> Vec<u8> {
         let mut raw = Vec::with_capacity(3 * self.data.total_length());
         let (vmin, vmax) = self.vlims;
         for row in self.data.iter() {
