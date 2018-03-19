@@ -15,6 +15,8 @@ use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, GlyphCache, OpenGL, Texture, TextureSettings};
 use graphics::Viewport;
 
+use std::collections::HashMap;
+
 pub struct PistonBackend {
     figures: Vec<Figure>,
     events: Events,
@@ -30,6 +32,7 @@ struct Figure {
     /// OpenGL drawing backend
     gl: GlGraphics,
     glyph_cache: GlyphCache<'static>,
+    texture_cache: HashMap<mb::ImageId, Texture>,
     /// Figure size cached in pixel (w, h)
     cached_size: (f64, f64),
 }
@@ -82,6 +85,7 @@ impl mb::Backend for PistonBackend {
                 (),
                 TextureSettings::new(),
             )?,
+            texture_cache: HashMap::new(),
             cached_size: figure.size,
         });
         self.figure_id_count += 1;
@@ -176,12 +180,14 @@ impl mb::Backend for PistonBackend {
         let scale_y = (disp_height / 2.0 * fig_height) / pix_h;
         let dx = (1.0 + disp_x) * fig_width / 2.0;
         let dy = (1.0 + disp_y - disp_height) * fig_height / 2.0;
+        let texture = fig.texture_cache.entry(image.id).or_insert_with(|| {
+            let image = to_gl_imagebuffer(image);
+            Texture::from_image(&image, &texture::TextureSettings::new())
+        });
         fig.gl.draw(view_port, |c, gl| {
             use graphics::Transformed;
             let transform = c.transform.trans(dx, dy).scale(scale_x, scale_y);
-            let image = to_gl_imagebuffer(image);
-            let my_texture = Texture::from_image(&image, &texture::TextureSettings::new());
-            graphics::image(&my_texture, transform, gl);
+            graphics::image(texture, transform, gl);
         });
         Ok(())
     }
