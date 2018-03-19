@@ -1,4 +1,4 @@
-use matplotrs_backend;
+use matplotrs_backend as mb;
 use artist::Artist;
 use axis::Axis;
 use color::{BLACK, WHITE};
@@ -6,6 +6,7 @@ use color_lut::ColorLUT;
 use extend_vec::{HasMinMax, HasShape, HasTotalLength};
 
 pub struct ImageView {
+    id: mb::ImageId,
     data: Vec<Vec<f64>>,
     xaxis: Axis,
     yaxis: Axis,
@@ -22,7 +23,7 @@ pub struct ImageViewBuilder {
 }
 
 pub struct ImageViewAttributes {
-    interpolation: matplotrs_backend::Interpolation,
+    interpolation: mb::Interpolation,
     lut: ColorLUT,
 }
 
@@ -95,6 +96,7 @@ impl ImageViewBuilder {
                 (vmin, vmax)
             });
             Ok(ImageView {
+                id: mb::ImageId(1),
                 data: self.data,
                 xaxis,
                 yaxis,
@@ -123,7 +125,7 @@ impl ImageViewBuilder {
 impl Default for ImageViewAttributes {
     fn default() -> Self {
         Self {
-            interpolation: matplotrs_backend::Interpolation::None,
+            interpolation: mb::Interpolation::None,
             lut: ColorLUT::linear(vec![(0.0, BLACK), (1.0, WHITE)]),
         }
     }
@@ -180,22 +182,23 @@ fn fit_size_within_container((width, height): (usize, usize)) -> (f64, f64) {
 }
 
 impl Artist for ImageView {
-    fn paths(&self) -> Vec<matplotrs_backend::Path> {
+    fn paths(&self) -> Vec<mb::Path> {
         let mut paths = self.xaxis.paths();
         paths.extend(self.yaxis.paths());
         paths
     }
 
-    fn texts(&self) -> Vec<matplotrs_backend::Text> {
+    fn texts(&self) -> Vec<mb::Text> {
         let mut texts = self.xaxis.texts();
         texts.extend(self.yaxis.texts());
         texts
     }
 
-    fn images(&self) -> Vec<matplotrs_backend::Image> {
+    fn images(&self) -> Vec<mb::Image> {
         let (width, height) = self.data.shape();
         vec![
-            matplotrs_backend::Image {
+            mb::Image {
+                id: self.id,
                 width,
                 height,
                 interpolation: self.i.interpolation,

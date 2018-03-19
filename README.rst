@@ -6,3 +6,5 @@ Objective:
 - Make it rusty
 - Have support for several back-end (piston/glium/printpdf/gfx considered)
 - Make it reactive
+
+Add ID (hash from input data) to image. ID is set on image creation.

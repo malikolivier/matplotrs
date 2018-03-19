@@ -26,6 +26,8 @@ pub struct Text {
 }
 
 pub struct Image {
+    /// This ID is guaranteed to be unique. The back-end is free to use it for caching purposes.
+    pub id: ImageId,
     pub width: usize,
     pub height: usize,
     pub interpolation: Interpolation,
@@ -47,6 +49,9 @@ pub struct FigureRepr {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct FigureId(pub usize);
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct ImageId(pub u64);
 
 #[derive(Copy, Clone)]
 pub enum Interpolation {
