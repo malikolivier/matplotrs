@@ -12,7 +12,7 @@ mod events;
 use piston::window::WindowSettings;
 use piston::event_loop::*;
 use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{GlGraphics, GlyphCache, OpenGL, Texture, TextureSettings};
+use opengl_graphics::{Filter, GlGraphics, GlyphCache, OpenGL, Texture, TextureSettings};
 use graphics::Viewport;
 
 use std::collections::HashMap;
@@ -182,7 +182,10 @@ impl mb::Backend for PistonBackend {
         let dy = (1.0 + disp_y - disp_height) * fig_height / 2.0;
         let texture = fig.texture_cache.entry(image.id).or_insert_with(|| {
             let image = to_gl_imagebuffer(image);
-            Texture::from_image(&image, &texture::TextureSettings::new())
+            Texture::from_image(
+                &image,
+                &texture::TextureSettings::new().filter(Filter::Nearest),
+            )
         });
         fig.gl.draw(view_port, |c, gl| {
             use graphics::Transformed;
