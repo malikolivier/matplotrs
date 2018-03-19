@@ -12,12 +12,13 @@ pub struct FigureBuilder {
     pub f: Figure,
 }
 
+
 pub struct FigureAttributes {
     pub figsize: (f64, f64),
     pub dpi: f64,
     pub title: Option<String>,
     pub facecolor: Color,
-    pub click_event_handlers: Vec<Box<FnMut(&ClickEvent, &mut Figure)>>,
+    pub click_event_handlers: Vec<Box<FnMut(&ClickEvent)>>,
 }
 
 impl FigureBuilder {
@@ -51,7 +52,7 @@ impl FigureBuilder {
 
     pub fn with_onclick<F>(mut self, f: F) -> Self
     where
-        F: 'static + FnMut(&ClickEvent, &mut Figure),
+        F: 'static + FnMut(&ClickEvent),
     {
         self.f.f.click_event_handlers.push(Box::new(f));
         self
@@ -89,7 +90,7 @@ impl Figure {
 
     pub fn onclick<F>(&mut self, f: F)
     where
-        F: 'static + FnMut(&ClickEvent, &mut Figure),
+        F: 'static + FnMut(&ClickEvent),
     {
         self.f.click_event_handlers.push(Box::new(f));
     }

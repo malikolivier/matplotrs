@@ -44,15 +44,15 @@ impl App {
                 EventKind::Resize(w, h) => self.map_on_figure_by_id(event.fig_id, |fig| {
                     fig.set_figsize(w, h);
                 })?,
-                EventKind::Close => (),     /* NOOP for the time being */
+                EventKind::Close => (), /* NOOP for the time being */
                 EventKind::Click(e) => {
                     println!("{:?}", e);
                     self.map_on_figure_by_id(event.fig_id, |fig| {
                         for handler in fig.f.click_event_handlers.iter_mut() {
-                            handler(&e, fig);
+                            handler(&e);
                         }
                     })?;
-                },
+                }
             };
         }
         Ok(0)

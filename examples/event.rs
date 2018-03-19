@@ -11,7 +11,7 @@ fn main() {
         .with_figsize(200, 200)
         .with_title("Empty!")
         .build();
-    fig.onclick(|e, fig| {
+    fig.onclick(|e| {
         println!("{:?}", e);
         fig.set_facecolor(RED);
     });
