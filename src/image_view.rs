@@ -4,6 +4,9 @@ use axis::Axis;
 use color::{BLACK, WHITE};
 use color_lut::ColorLUT;
 use extend_vec::{HasMinMax, HasShape, HasTotalLength};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use time;
 
 pub struct ImageView {
     id: mb::ImageId,
@@ -96,7 +99,7 @@ impl ImageViewBuilder {
                 (vmin, vmax)
             });
             Ok(ImageView {
-                id: mb::ImageId(1),
+                id: compute_image_id(&self.data),
                 data: self.data,
                 xaxis,
                 yaxis,
@@ -208,6 +211,18 @@ impl Artist for ImageView {
             },
         ]
     }
+}
+
+/// Make a unique ID to identify the image
+fn compute_image_id(data: &Vec<Vec<f64>>) -> mb::ImageId {
+    let mut s = DefaultHasher::new();
+    for row in data.iter() {
+        for val in row.iter() {
+            (*val as u64).hash(&mut s);
+        }
+    }
+    time::now().tm_nsec.hash(&mut s);
+    mb::ImageId(s.finish())
 }
 
 #[cfg(test)]

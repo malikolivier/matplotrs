@@ -14,6 +14,7 @@ pub mod color_lut;
 mod extend_vec;
 
 pub extern crate matplotrs_backend;
+extern crate time;
 
 #[cfg(feature = "amethyst")]
 pub mod backend {

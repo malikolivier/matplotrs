@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Malik Olivier Boussejra <malik@boussejra.com>"]
 
 [dependencies]
+time = "0.1"
 matplotrs_backend = { path = "./backend" }
 matplotrs_piston_backend = { path = "./piston_backend", optional = true }
 matplotrs_printpdf_backend = { path = "./printpdf_backend", optional = true }
