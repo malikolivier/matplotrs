@@ -48,9 +48,8 @@ impl App {
                 EventKind::Click(e) => {
                     println!("{:?}", e);
                     self.map_on_figure_by_id(event.fig_id, |fig| {
-                        let handlers = &fig.click_event_handlers;
-                        for handler in handlers {
-                            let mut figs = vec![&mut fig.f];
+                        let mut figs = vec![&mut fig.f];
+                        for handler in fig.click_event_handlers.iter_mut() {
                             handler(&e, figs.as_mut_slice());
                         }
                     })?;

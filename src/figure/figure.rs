@@ -6,13 +6,12 @@ use artist::Artist;
 pub struct Figure {
     pub f: FigureAttributes,
     pub children: Vec<Box<Artist>>,
-    pub click_event_handlers: Vec<Box<Fn(&ClickEvent, &mut [&mut FigureAttributes])>>,
+    pub click_event_handlers: Vec<Box<FnMut(&ClickEvent, &mut [&mut FigureAttributes])>>,
 }
 
 pub struct FigureBuilder {
     pub f: Figure,
 }
-
 
 pub struct FigureAttributes {
     pub figsize: (f64, f64),
@@ -91,7 +90,7 @@ impl Figure {
 
     pub fn onclick<F>(&mut self, f: F)
     where
-        F: 'static + Fn(&ClickEvent, &mut [&mut FigureAttributes]),
+        F: 'static + FnMut(&ClickEvent, &mut [&mut FigureAttributes]),
     {
         self.click_event_handlers.push(Box::new(f));
     }
