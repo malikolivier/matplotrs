@@ -6,6 +6,7 @@ use artist::Artist;
 pub struct Figure {
     pub f: FigureAttributes,
     pub children: Vec<Box<Artist>>,
+    pub click_event_handlers: Vec<Box<Fn(&ClickEvent, &mut [&mut FigureAttributes])>>,
 }
 
 pub struct FigureBuilder {
@@ -18,7 +19,6 @@ pub struct FigureAttributes {
     pub dpi: f64,
     pub title: Option<String>,
     pub facecolor: Color,
-    pub click_event_handlers: Vec<Box<FnMut(&ClickEvent)>>,
 }
 
 impl FigureBuilder {
@@ -26,6 +26,7 @@ impl FigureBuilder {
         let figure = Figure {
             f: Default::default(),
             children: Vec::new(),
+            click_event_handlers: Vec::new(),
         };
         FigureBuilder { f: figure }
     }
@@ -50,13 +51,13 @@ impl FigureBuilder {
         self
     }
 
-    pub fn with_onclick<F>(mut self, f: F) -> Self
-    where
-        F: 'static + FnMut(&ClickEvent),
-    {
-        self.f.f.click_event_handlers.push(Box::new(f));
-        self
-    }
+    // pub fn with_onclick<F>(mut self, f: F) -> Self
+    // where
+    //     F: 'static + FnMut(&ClickEvent),
+    // {
+    //     self.f.f.click_event_handlers.push(Box::new(f));
+    //     self
+    // }
 
     pub fn build(self) -> Figure {
         self.f
@@ -90,9 +91,9 @@ impl Figure {
 
     pub fn onclick<F>(&mut self, f: F)
     where
-        F: 'static + FnMut(&ClickEvent),
+        F: 'static + Fn(&ClickEvent, &mut [&mut FigureAttributes]),
     {
-        self.f.click_event_handlers.push(Box::new(f));
+        self.click_event_handlers.push(Box::new(f));
     }
 
     pub fn render(
@@ -137,7 +138,6 @@ impl Default for FigureAttributes {
             dpi: 100.0,
             title: None,
             facecolor: Color::rgb(255.0, 255.0, 255.0),
-            click_event_handlers: Vec::new(),
         }
     }
 }
